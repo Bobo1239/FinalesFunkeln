@@ -16,3 +16,19 @@ impl HitRecord {
         HitRecord { t, p, normal }
     }
 }
+
+impl Hit for Vec<Box<Hit>> {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        self.iter()
+            .fold((None, t_max), |(closest_hit, closest_t), item| {
+                match item.hit(ray, t_min, closest_t) {
+                    Some(hit_record) => {
+                        let t = hit_record.t;
+                        (Some(hit_record), t)
+                    }
+                    None => (closest_hit, closest_t),
+                }
+            })
+            .0
+    }
+}
