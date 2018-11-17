@@ -1,7 +1,6 @@
-use vec3::vec3;
+use vec3::Vec3;
 
 #[derive(Debug)]
 pub struct Image {
-	image: Vec<Vec<vec3>>,
+    image: Vec<Vec<Vec3>>,
 }
-
