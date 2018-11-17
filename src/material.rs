@@ -5,7 +5,8 @@ use vec3::Vec3;
 use rand::Rng;
 
 trait Scatter {
-    fn scatter(&self, ray: &Ray, attenuation: &Vec3, hit_record: &HitRecord) -> (Ray, Vec3);
+    fn scatter(&self, ray: &Ray, attenuation: &Vec3, hit_record: &HitRecord)
+        -> Option<(Ray, Vec3)>;
 }
 
 struct Lambertian {
@@ -13,10 +14,37 @@ struct Lambertian {
 }
 
 impl Scatter for Lambertian {
-    fn scatter(&self, _ray: &Ray, _attenuation: &Vec3, hit_record: &HitRecord) -> (Ray, Vec3) {
+    fn scatter(
+        &self,
+        _ray: &Ray,
+        _attenuation: &Vec3,
+        hit_record: &HitRecord,
+    ) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_sphere();
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p);
-        (scattered, self.albedo)
+        Some((scattered, self.albedo))
+    }
+}
+
+#[derive(Debug)]
+struct Metal {
+    albedo: Vec3,
+}
+
+impl Scatter for Metal {
+    fn scatter(
+        &self,
+        ray: &Ray,
+        _attenuation: &Vec3,
+        hit_record: &HitRecord,
+    ) -> Option<(Ray, Vec3)> {
+        let refleced: Vec3 = reflect(&ray.direction().unit_vector(), &hit_record.normal);
+        let scattered: Ray = Ray::new(hit_record.p, refleced);
+        if scattered.direction().dot(&hit_record.normal) > 0.0 {
+            Some((scattered, self.albedo))
+        } else {
+            None
+        }
     }
 }
 
@@ -30,6 +58,10 @@ fn random_in_sphere() -> Vec3 {
             return p;
         }
     }
+}
+
+fn reflect(vector: &Vec3, normal: &Vec3) -> Vec3 {
+    *vector - 2.0 * vector.dot(normal) * *normal
 }
 
 // struct Metal
