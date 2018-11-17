@@ -139,51 +139,63 @@ impl Mul<f32> for Vec3 {
 
 impl Div<f32> for Vec3 {
     type Output = Vec3;
-    fn div(self, other: f32) -> Vec3 {
+    fn div(self, t: f32) -> Vec3 {
         unimplemented!();
     }
 }
 
 impl Mul<Vec3> for f32 {
     type Output = Vec3;
-    fn mul(self, other: Vec3) -> Vec3 {
+    fn mul(self, t: Vec3) -> Vec3 {
         unimplemented!();
     }
 }
 
 impl AddAssign for Vec3 {
     fn add_assign(&mut self, other: Vec3) {
-        unimplemented!();
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
     }
 }
 
 impl SubAssign for Vec3 {
     fn sub_assign(&mut self, other: Vec3) {
-        unimplemented!();
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
     }
 }
 
 impl MulAssign for Vec3 {
     fn mul_assign(&mut self, other: Vec3) {
-        unimplemented!();
+        self.x *= other.x;
+        self.y *= other.y;
+        self.z *= other.z;
     }
 }
 
 impl DivAssign for Vec3 {
     fn div_assign(&mut self, other: Vec3) {
-        unimplemented!();
+        self.x /= other.x;
+        self.y /= other.y;
+        self.z /= other.z;
     }
 }
 
 impl MulAssign<f32> for Vec3 {
-    fn mul_assign(&mut self, other: f32) {
-        unimplemented!();
+    fn mul_assign(&mut self, t: f32) {
+        self.x *= t;
+        self.y *= t;
+        self.z *= t;
     }
 }
 
 impl DivAssign<f32> for Vec3 {
-    fn div_assign(&mut self, other: f32) {
-        unimplemented!();
+    fn div_assign(&mut self, t: f32) {
+        self.x /= t;
+        self.y /= t;
+        self.z /= t;
     }
 }
 
