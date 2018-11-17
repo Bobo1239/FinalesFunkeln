@@ -71,13 +71,23 @@ impl Vec3 {
 impl Index<usize> for Vec3 {
     type Output = f32;
     fn index(&self, idx: usize) -> &f32 {
-        unimplemented!();
+        match idx {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("invalid index {}", idx),
+        }
     }
 }
 
 impl IndexMut<usize> for Vec3 {
     fn index_mut(&mut self, idx: usize) -> &mut f32 {
-        unimplemented!();
+        match idx {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => panic!("invalid index {}", idx),
+        }
     }
 }
 
