@@ -1,31 +1,27 @@
-extern crate finales_funkeln;
-
-use finales_funkeln::vec3::Vec3;
+use vec3::Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
-	origin: Vec3,
-	direction: Vec3,
+    origin: Vec3,
+    direction: Vec3,
 }
 
 impl Ray {
-	pub fn new() -> Ray {}
+    pub fn new(origin: Vec3, direction: Vec3) -> Ray {
+        Ray { origin, direction }
+    }
 
-	pub fn new(origin: Vec3, direction: Vec3) -> Ray {
-		Ray { origin, direction }
-	}
+    pub fn origin(&self) -> Vec3 {
+        self.origin
+    }
 
-	pub fn origin(&self) -> Vec3 {
-		self.origin
-	}
-
-	pub fn direction(&self) -> Vec3 {
-		self.direction
-	}
+    pub fn direction(&self) -> Vec3 {
+        self.direction
+    }
 }
 
 impl Ray {
-	pub fn point_at_parameter(self, t: f32) -> Vec3 {
-		self.origin + t * self.direction
-	}
+    pub fn point_at_parameter(self, t: f32) -> Vec3 {
+        self.origin + t * self.direction
+    }
 }
