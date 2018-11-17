@@ -31,7 +31,7 @@ impl Image {
         let header = format!("P3\n{}\n{}\n255\n", self.image[0].len(), self.image.len());
         file.write_all(header.as_bytes())?;
 
-        for row in &self.image {
+        for row in self.image.iter().rev() {
             for pixel in row {
                 let r = (pixel.r() * 255.99) as u8;
                 let g = (pixel.g() * 255.99) as u8;
