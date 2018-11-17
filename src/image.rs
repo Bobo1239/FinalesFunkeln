@@ -29,14 +29,14 @@ impl Image {
         let mut file = File::create(&path)?;
 
         let header = format!("P3 {} {} 255\n", self.image.len(), self.image[0].len());
-        file.write(header.as_bytes())?;
+        file.write_all(header.as_bytes())?;
 
         for row in &self.image {
             for pixel in row {
                 let pixel_val = format!("{} {} {}   ", pixel.r(), pixel.g(), pixel.b());
-                file.write(pixel_val.as_bytes())?;
+                file.write_all(pixel_val.as_bytes())?;
             }
-            file.write("\n".as_bytes())?;
+            file.write_all("\n".as_bytes())?;
         }
 
         Ok(())
