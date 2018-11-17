@@ -33,9 +33,9 @@ impl Image {
 
         for row in &self.image {
             for pixel in row {
-                let r = (pixel.r() * 255.) as u8;
-                let g = (pixel.g() * 255.) as u8;
-                let b = (pixel.b() * 255.) as u8;
+                let r = (pixel.r() * 255.99) as u8;
+                let g = (pixel.g() * 255.99) as u8;
+                let b = (pixel.b() * 255.99) as u8;
                 let pixel_val = format!("{} {} {}\n", r, g, b);
                 file.write_all(pixel_val.as_bytes())?;
             }
