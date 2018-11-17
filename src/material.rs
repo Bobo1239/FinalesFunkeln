@@ -1,11 +1,8 @@
-use rand::Rng;
+use hit::HitRecord;
 use ray::Ray;
 use vec3::Vec3;
 
-struct HitRecord {
-    p: Vec3,
-    normal: Vec3,
-}
+use rand::Rng;
 
 trait Scatter {
     fn scatter(&self, ray: &Ray, attenuation: &Vec3, hit_record: &HitRecord) -> (Ray, Vec3);
@@ -19,7 +16,7 @@ impl Scatter for Lambertian {
     fn scatter(&self, _ray: &Ray, _attenuation: &Vec3, hit_record: &HitRecord) -> (Ray, Vec3) {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_sphere();
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p);
-        return (scattered, self.albedo);
+        (scattered, self.albedo)
     }
 }
 
