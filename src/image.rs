@@ -28,15 +28,17 @@ impl Image {
     pub fn save_to_ppm(&self, path: &Path) -> Result<(), io::Error> {
         let mut file = File::create(&path)?;
 
-        let header = format!("P3 {} {} 255\n", self.image.len(), self.image[0].len());
+        let header = format!("P3\n{}\n{}\n255\n", self.image[0].len(), self.image.len());
         file.write_all(header.as_bytes())?;
 
         for row in &self.image {
             for pixel in row {
-                let pixel_val = format!("{} {} {}   ", pixel.r(), pixel.g(), pixel.b());
+                let r = (pixel.r() * 255.) as u8;
+                let g = (pixel.g() * 255.) as u8;
+                let b = (pixel.b() * 255.) as u8;
+                let pixel_val = format!("{} {} {}\n", r, g, b);
                 file.write_all(pixel_val.as_bytes())?;
             }
-            file.write_all("\n".as_bytes())?;
         }
 
         Ok(())
