@@ -4,12 +4,27 @@ use std::path::Path;
 
 use vec3::Vec3;
 
+/// An image. The origin is at the upper-left corner.
 #[derive(Debug)]
 pub struct Image {
     image: Vec<Vec<Vec3>>,
 }
 
 impl Image {
+    pub fn new(width: usize, height: usize) -> Image {
+        Image {
+            image: vec![Vec::with_capacity(width); height],
+        }
+    }
+
+    pub fn set_pixel(&mut self, x: usize, y: usize, color: Vec3) {
+        self.image[y][x] = color;
+    }
+
+    pub fn get_pixel(&mut self, x: usize, y: usize) -> &Vec3 {
+        &self.image[y][x]
+    }
+
     pub fn save_to_ppm(&self, path: &Path) -> Result<(), io::Error> {
         let mut file = File::create(&path)?;
 
