@@ -13,7 +13,7 @@ pub struct Image {
 impl Image {
     pub fn new(width: usize, height: usize) -> Image {
         Image {
-            image: vec![Vec::with_capacity(width); height],
+            image: vec![vec![Vec3::default(); width]; height],
         }
     }
 

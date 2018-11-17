@@ -1,7 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 use std::ops::*;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {
     x: f32,
     y: f32,
