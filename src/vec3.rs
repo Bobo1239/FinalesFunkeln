@@ -2,61 +2,69 @@ use core::ops::*;
 use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Vec3([f32; 3]);
+pub struct Vec3 {
+    x: f32,
+    y: f32,
+    z: f32,
+}
 
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
-        Vec3([x, y, z])
+        Vec3 { x, y, z }
     }
 
     pub fn x(&self) -> f32 {
-        self.0[0]
+        self.x
     }
 
     pub fn y(&self) -> f32 {
-        self.0[1]
+        self.y
     }
 
     pub fn z(&self) -> f32 {
-        self.0[2]
+        self.z
     }
 
     pub fn r(&self) -> f32 {
-        self.0[0]
+        self.x
     }
 
     pub fn g(&self) -> f32 {
-        self.0[1]
+        self.y
     }
 
     pub fn b(&self) -> f32 {
-        self.0[2]
+        self.z
     }
 }
 
 impl Vec3 {
     pub fn length(&self) -> f32 {
-        unimplemented!();
+        self.length_squared().sqrt()
     }
 
     pub fn length_squared(&self) -> f32 {
-        unimplemented!();
+        self.x().powi(2) + self.y().powi(2) + self.z().powi(2)
     }
 
     pub fn unit_vector(&self) -> Vec3 {
-        unimplemented!();
+        *self / self.length()
     }
 
     pub fn make_unit_vector(&mut self) {
-        unimplemented!();
+        *self /= self.length()
     }
 
     pub fn dot(&self, other: &Vec3) -> f32 {
-        unimplemented!();
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     pub fn cross(&self, other: &Vec3) -> Vec3 {
-        unimplemented!();
+        Vec3::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 }
 
