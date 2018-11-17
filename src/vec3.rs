@@ -105,49 +105,77 @@ impl Neg for Vec3 {
 impl Add for Vec3 {
     type Output = Vec3;
     fn add(self, other: Vec3) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
     }
 }
 
 impl Sub for Vec3 {
     type Output = Vec3;
     fn sub(self, other: Vec3) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
 }
 
 impl Mul for Vec3 {
     type Output = Vec3;
     fn mul(self, other: Vec3) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
+        }
     }
 }
 
 impl Div for Vec3 {
     type Output = Vec3;
     fn div(self, other: Vec3) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: self.x / other.x,
+            y: self.y / other.y,
+            z: self.z / other.z,
+        }
     }
 }
 
 impl Mul<f32> for Vec3 {
     type Output = Vec3;
-    fn mul(self, other: f32) -> Vec3 {
-        unimplemented!();
+    fn mul(self, t: f32) -> Vec3 {
+        Vec3 {
+            x: self.x * t,
+            y: self.y * t,
+            z: self.z * t,
+        }
     }
 }
 
 impl Div<f32> for Vec3 {
     type Output = Vec3;
     fn div(self, t: f32) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: self.x / t,
+            y: self.y / t,
+            z: self.z / t,
+        }
     }
 }
 
 impl Mul<Vec3> for f32 {
     type Output = Vec3;
-    fn mul(self, t: Vec3) -> Vec3 {
-        unimplemented!();
+    fn mul(self, other: Vec3) -> Vec3 {
+        Vec3 {
+            x: self * other.x,
+            y: self * other.y,
+            z: self * other.z,
+        }
     }
 }
 
