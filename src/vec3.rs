@@ -1,5 +1,5 @@
-use core::ops::*;
 use std::fmt::{self, Display, Formatter};
+use std::ops::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -94,7 +94,11 @@ impl IndexMut<usize> for Vec3 {
 impl Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Vec3 {
-        unimplemented!();
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 

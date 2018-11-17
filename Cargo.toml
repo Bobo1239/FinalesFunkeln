@@ -2,6 +2,5 @@
 name = "finales_funkeln"
 version = "0.1.0"
 authors = ["Boris-Chengbiao Zhou <bobo1239@web.de>"]
-edition = "2018"
 
 [dependencies]
