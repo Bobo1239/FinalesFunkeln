@@ -16,9 +16,9 @@ use finales_funkeln::sphere::Sphere;
 use finales_funkeln::vec3::Vec3;
 
 fn main() -> Result<(), Box<Error>> {
-    let width = 200;
-    let height = 100;
-    let samples_per_pixel = 10;
+    let width = 640;
+    let height = 480;
+    let samples_per_pixel = 100;
     let mut image = Image::new(width, height);
     let mut rng = rand::thread_rng();
 
@@ -131,7 +131,7 @@ fn random_scene() -> Vec<Box<Hit>> {
         Material::Lambertian(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
     )));
     list.push(Box::new(Sphere::new(
-        Vec3::new(-4., 1., 0.),
+        Vec3::new(4., 1., 0.),
         1.,
         Material::Metal(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.)),
     )));
