@@ -24,7 +24,6 @@ impl Hit for [Box<Hit>] {
                     }
                     None => (closest_hit, closest_t),
                 }
-            })
-            .0
+            }).0
     }
 }

@@ -65,6 +65,76 @@ impl Scatter for Metal {
     }
 }
 
+#[derive(Debug)]
+pub struct Dielectric {
+    ref_idx: f32,
+}
+
+impl Dielectric {
+    pub fn new(ref_idx: f32) -> Dielectric {
+        Dielectric { ref_idx }
+    }
+}
+
+impl Scatter for Dielectric {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        _attenuation: &Vec3,
+        hit_record: &HitRecord,
+    ) -> Option<(Ray, Vec3)> {
+        let mut refracted: Vec3 = Vec3::default();
+        let reflect_prob: f32;
+        let reflected = reflect(&r_in.direction(), &hit_record.normal);
+        let attenuation = Vec3::new(1.0, 1.0, 1.0);
+        let (outward_normal, ni_over_nt, cosine) = if r_in.direction().dot(&hit_record.normal) > 0.0
+        {
+            (
+                -hit_record.normal,
+                self.ref_idx,
+                (self.ref_idx * r_in.direction().dot(&hit_record.normal)
+                    / r_in.direction().length()),
+            )
+        } else {
+            (
+                hit_record.normal,
+                1.0 / self.ref_idx,
+                (-r_in.direction().dot(&hit_record.normal) / r_in.direction().length()),
+            )
+        };
+        let refr = refract(&r_in.direction(), &outward_normal, ni_over_nt);
+        match refr {
+            Some(refr) => {
+                reflect_prob = schlick(cosine, self.ref_idx);
+                refracted = refr
+            }
+            None => reflect_prob = 1.0,
+        }
+        if rand::thread_rng().gen::<f32>() < reflect_prob {
+            Some((Ray::new(hit_record.p, reflected), attenuation))
+        } else {
+            Some((Ray::new(hit_record.p, refracted), attenuation))
+        }
+    }
+}
+
+fn schlick(cosine: f32, ref_idx: f32) -> f32 {
+    let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+    r0 = r0 * r0;
+    (r0 + (1.0 - r0) * (1.0 - cosine).powi(5))
+}
+
+fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
+    let uv = v.unit_vector();
+    let dt = uv.dot(n);
+    let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);
+    if discriminant > 0.0 {
+        Some(ni_over_nt * (uv - *n * dt) - *n * discriminant.sqrt())
+    } else {
+        None
+    }
+}
+
 fn random_in_sphere() -> Vec3 {
     let mut rng = rand::thread_rng();
     loop {
