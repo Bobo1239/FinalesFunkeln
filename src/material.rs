@@ -12,6 +12,7 @@ pub trait Scatter {
 pub enum Material {
     Lambertian(Lambertian),
     Metal(Metal),
+    Dielectric(Dielectric),
 }
 
 impl Scatter for Material {
@@ -19,6 +20,7 @@ impl Scatter for Material {
         match self {
             Material::Lambertian(lambertian) => lambertian.scatter(ray, hit_record),
             Material::Metal(metal) => metal.scatter(ray, hit_record),
+            Material::Dielectric(dielectric) => dielectric.scatter(ray, hit_record),
         }
     }
 }
@@ -36,7 +38,7 @@ impl Lambertian {
 
 impl Scatter for Lambertian {
     fn scatter(&self, _ray: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
-        let target: Vec3 = hit_record.p + hit_record.normal + random_in_sphere();
+        let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere();
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p);
         Some((scattered, self.albedo))
     }
@@ -45,18 +47,23 @@ impl Scatter for Lambertian {
 #[derive(Debug, Clone)]
 pub struct Metal {
     albedo: Vec3,
+    fuzz: f32,
 }
 
 impl Metal {
-    pub fn new(albedo: Vec3) -> Metal {
-        Metal { albedo }
+    pub fn new(albedo: Vec3, fuzz: f32) -> Metal {
+        assert!(fuzz <= 1.);
+        Metal { albedo, fuzz }
     }
 }
 
 impl Scatter for Metal {
     fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
-        let refleced: Vec3 = reflect(&ray.direction().unit_vector(), &hit_record.normal);
-        let scattered: Ray = Ray::new(hit_record.p, refleced);
+        let reflected = reflect(&ray.direction().unit_vector(), &hit_record.normal);
+        let scattered = Ray::new(
+            hit_record.p,
+            reflected + self.fuzz * random_in_unit_sphere(),
+        );
         if scattered.direction().dot(&hit_record.normal) > 0.0 {
             Some((scattered, self.albedo))
         } else {
@@ -65,7 +72,7 @@ impl Scatter for Metal {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Dielectric {
     ref_idx: f32,
 }
@@ -77,12 +84,7 @@ impl Dielectric {
 }
 
 impl Scatter for Dielectric {
-    fn scatter(
-        &self,
-        r_in: &Ray,
-        _attenuation: &Vec3,
-        hit_record: &HitRecord,
-    ) -> Option<(Ray, Vec3)> {
+    fn scatter(&self, r_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
         let mut refracted: Vec3 = Vec3::default();
         let reflect_prob: f32;
         let reflected = reflect(&r_in.direction(), &hit_record.normal);
@@ -135,7 +137,7 @@ fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
     }
 }
 
-fn random_in_sphere() -> Vec3 {
+fn random_in_unit_sphere() -> Vec3 {
     let mut rng = rand::thread_rng();
     loop {
         let p = Vec3::new(rng.gen(), rng.gen(), rng.gen()) * 2.0 - Vec3::new(1., 1., 1.);
