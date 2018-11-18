@@ -34,8 +34,14 @@ fn main() -> Result<(), Box<Error>> {
     let height = 400;
     let samples_per_pixel = 100;
     let mut image = Image::new(width, height);
-
-    let camera = Camera::new();
+    let camera = {
+        let origin = Vec3::new(-0.3, 0.3, 0.3);
+        let look_at = Vec3::new(0., 0., -1.);
+        let up = Vec3::new(0., 1., 0.);
+        let vertical_fov = 90.;
+        let aspect_ratio = 800 as f32 / 400 as f32;
+        Camera::new(origin, look_at, up, vertical_fov, aspect_ratio)
+    };
     let mut rng = rand::thread_rng();
 
     let mut hit_list: Vec<Box<Hit>> = Vec::new();
