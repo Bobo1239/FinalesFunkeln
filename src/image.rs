@@ -28,7 +28,7 @@ impl Image {
     pub fn save_to_ppm(&self, path: &Path) -> Result<(), io::Error> {
         let mut file = File::create(&path)?;
 
-        let header = format!("P3\n{}\n{}\n255\n", self.image[0].len(), self.image.len());
+        let header = format!("P6\n{}\n{}\n255\n", self.image[0].len(), self.image.len());
         file.write_all(header.as_bytes())?;
 
         for row in self.image.iter().rev() {
@@ -36,8 +36,7 @@ impl Image {
                 let r = (pixel.r() * 255.99) as u8;
                 let g = (pixel.g() * 255.99) as u8;
                 let b = (pixel.b() * 255.99) as u8;
-                let pixel_val = format!("{} {} {}\n", r, g, b);
-                file.write_all(pixel_val.as_bytes())?;
+                file.write_all(&[r, g, b])?;
             }
         }
 
