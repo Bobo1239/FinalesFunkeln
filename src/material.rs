@@ -9,8 +9,21 @@ trait Scatter {
         -> Option<(Ray, Vec3)>;
 }
 
-struct Lambertian {
+#[derive(Debug)]
+pub enum Material {
+    Lambertian(Lambertian),
+    Metal(Metal),
+}
+
+#[derive(Debug)]
+pub struct Lambertian {
     albedo: Vec3,
+}
+
+impl Lambertian {
+    pub fn new(albedo: Vec3) -> Lambertian {
+        Lambertian { albedo }
+    }
 }
 
 impl Scatter for Lambertian {
@@ -27,8 +40,14 @@ impl Scatter for Lambertian {
 }
 
 #[derive(Debug)]
-struct Metal {
+pub struct Metal {
     albedo: Vec3,
+}
+
+impl Metal {
+    pub fn new(albedo: Vec3) -> Metal {
+        Metal { albedo }
+    }
 }
 
 impl Scatter for Metal {
@@ -63,13 +82,3 @@ fn random_in_sphere() -> Vec3 {
 fn reflect(vector: &Vec3, normal: &Vec3) -> Vec3 {
     *vector - 2.0 * vector.dot(normal) * *normal
 }
-
-// struct Metal
-
-// impl Scatter for Metal
-
-// enum Material {
-// 	Metal(Metal)
-// }
-
-// impl Scatter for Material
