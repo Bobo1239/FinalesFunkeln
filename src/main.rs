@@ -35,12 +35,22 @@ fn main() -> Result<(), Box<Error>> {
     let samples_per_pixel = 100;
     let mut image = Image::new(width, height);
     let camera = {
-        let origin = Vec3::new(-0.3, 0.3, 0.3);
+        let origin = Vec3::new(0., 2.0, 2.0);
         let look_at = Vec3::new(0., 0., -1.);
         let up = Vec3::new(0., 1., 0.);
-        let vertical_fov = 90.;
+        let vertical_fov = 20.;
         let aspect_ratio = 800 as f32 / 400 as f32;
-        Camera::new(origin, look_at, up, vertical_fov, aspect_ratio)
+        let aperture = 2.0;
+        let focus_distance = (look_at - origin).length();
+        Camera::new(
+            origin,
+            look_at,
+            up,
+            vertical_fov,
+            aspect_ratio,
+            aperture,
+            focus_distance,
+        )
     };
     let mut rng = rand::thread_rng();
 
@@ -70,10 +80,10 @@ fn main() -> Result<(), Box<Error>> {
         for y in 0..height {
             let mut color_acc = Vec3::new(0., 0., 0.);
             for _ in 0..samples_per_pixel {
-                let u = (x as f32 + rng.gen::<f32>()) / width as f32;
-                let v = (y as f32 + rng.gen::<f32>()) / height as f32;
+                let s = (x as f32 + rng.gen::<f32>()) / width as f32;
+                let t = (y as f32 + rng.gen::<f32>()) / height as f32;
 
-                let ray = camera.get_ray(u, v);
+                let ray = camera.get_ray(s, t);
                 color_acc += color(&ray, &hit_list, 0);
             }
             image.set_pixel(x, y, color_acc / samples_per_pixel as f32);
