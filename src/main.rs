@@ -50,6 +50,11 @@ fn main() -> Result<(), Box<Error>> {
         Material::Lambertian(Lambertian::new(Vec3::new(1., 0., 0.))),
     )));
     hit_list.push(Box::new(Sphere::new(
+        Vec3::new(-0.6, 0., -0.5),
+        0.25,
+        Material::Metal(Metal::new(Vec3::new(0., 0., 1.))),
+    )));
+    hit_list.push(Box::new(Sphere::new(
         Vec3::new(0., -100.5, -1.),
         100.,
         Material::Lambertian(Lambertian::new(Vec3::new(0., 0.2, 0.))),
