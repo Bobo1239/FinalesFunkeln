@@ -2,7 +2,7 @@ use material::Material;
 use ray::Ray;
 use vec3::Vec3;
 
-pub trait Hit {
+pub trait Hit: Sync + Send {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }
 

@@ -1,11 +1,15 @@
 extern crate finales_funkeln;
 extern crate rand;
+extern crate rayon;
 
 use std::error::Error;
 use std::f32;
 use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{Arc, Mutex};
 
 use rand::Rng;
+use rayon::prelude::*;
 
 use finales_funkeln::camera::Camera;
 use finales_funkeln::hit::Hit;
@@ -19,8 +23,8 @@ fn main() -> Result<(), Box<Error>> {
     let width = 640;
     let height = 480;
     let samples_per_pixel = 100;
-    let mut image = Image::new(width, height);
-    let mut rng = rand::thread_rng();
+    let image = Arc::new(Mutex::new(Image::new(width, height)));
+    let finished_columns = AtomicUsize::new(0);
 
     let camera = {
         let origin = Vec3::new(13., 2., 3.);
@@ -42,7 +46,9 @@ fn main() -> Result<(), Box<Error>> {
     };
     let hit_list = random_scene();
 
-    for x in 0..width {
+    (0..width).into_par_iter().for_each(|x| {
+        let mut rng = rand::thread_rng();
+        let mut column = Vec::with_capacity(height);
         for y in 0..height {
             let mut color_acc = Vec3::new(0., 0., 0.);
             for _ in 0..samples_per_pixel {
@@ -52,12 +58,17 @@ fn main() -> Result<(), Box<Error>> {
                 let ray = camera.get_ray(s, t);
                 color_acc += color(&ray, &hit_list, 0);
             }
-            image.set_pixel(x, y, color_acc / samples_per_pixel as f32);
+            column.push(color_acc / samples_per_pixel as f32);
         }
-        println!("{} %", (x + 1) as f32 / width as f32 * 100.);
-    }
+        let mut image = image.lock().unwrap();
+        for (y, p) in column.iter().enumerate() {
+            image.set_pixel(x, y, *p);
+        }
+        let finished = finished_columns.fetch_add(1, Ordering::SeqCst);
+        println!("{}/{}", finished + 1, width);
+    });
 
-    image.save_to_ppm(Path::new("out.ppm"))?;
+    image.lock().unwrap().save_to_ppm(Path::new("out.ppm"))?;
 
     Ok(())
 }
