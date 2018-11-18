@@ -1,8 +1,11 @@
 extern crate finales_funkeln;
+extern crate rand;
 
 use std::error::Error;
 use std::f32;
 use std::path::Path;
+
+use rand::Rng;
 
 use finales_funkeln::camera::Camera;
 use finales_funkeln::hit::Hit;
@@ -25,9 +28,11 @@ fn color<T: Hit>(ray: &Ray, hit: &T) -> Vec3 {
 fn main() -> Result<(), Box<Error>> {
     let width = 800;
     let height = 400;
+    let samples_per_pixel = 100;
     let mut image = Image::new(width, height);
 
     let camera = Camera::new();
+    let mut rng = rand::thread_rng();
 
     let mut hit_list: Vec<Box<Hit>> = Vec::new();
     hit_list.push(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5)));
@@ -35,13 +40,15 @@ fn main() -> Result<(), Box<Error>> {
 
     for x in 0..width {
         for y in 0..height {
-            let u = x as f32 / width as f32;
-            let v = y as f32 / height as f32;
+            let mut color_acc = Vec3::new(0., 0., 0.);
+            for _ in 0..samples_per_pixel {
+                let u = (x as f32 + rng.gen::<f32>()) / width as f32;
+                let v = (y as f32 + rng.gen::<f32>()) / height as f32;
 
-            let ray = camera.get_ray(u, v);
-            let color = color(&ray, &hit_list);
-
-            image.set_pixel(x, y, color);
+                let ray = camera.get_ray(u, v);
+                color_acc += color(&ray, &hit_list);
+            }
+            image.set_pixel(x, y, color_acc / samples_per_pixel as f32);
         }
     }
 
