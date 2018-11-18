@@ -1,5 +1,6 @@
 extern crate rand;
 
+pub mod camera;
 pub mod hit;
 pub mod image;
 pub mod material;

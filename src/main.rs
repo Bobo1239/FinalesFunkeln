@@ -4,6 +4,7 @@ use std::error::Error;
 use std::f32;
 use std::path::Path;
 
+use finales_funkeln::camera::Camera;
 use finales_funkeln::hit::Hit;
 use finales_funkeln::image::Image;
 use finales_funkeln::ray::Ray;
@@ -26,10 +27,7 @@ fn main() -> Result<(), Box<Error>> {
     let height = 400;
     let mut image = Image::new(width, height);
 
-    let lower_left_corner = Vec3::new(-2., -1., -1.);
-    let horizontal = Vec3::new(4., 0., 0.);
-    let vertical = Vec3::new(0., 2., 0.);
-    let origin = Vec3::new(0., 0., 0.);
+    let camera = Camera::new();
 
     let mut hit_list: Vec<Box<Hit>> = Vec::new();
     hit_list.push(Box::new(Sphere::new(Vec3::new(0., 0., -1.), 0.5)));
@@ -40,7 +38,7 @@ fn main() -> Result<(), Box<Error>> {
             let u = x as f32 / width as f32;
             let v = y as f32 / height as f32;
 
-            let ray = Ray::new(origin, lower_left_corner + u * horizontal + v * vertical);
+            let ray = camera.get_ray(u, v);
             let color = color(&ray, &hit_list);
 
             image.set_pixel(x, y, color);
