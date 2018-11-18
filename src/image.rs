@@ -33,9 +33,9 @@ impl Image {
 
         for row in self.image.iter().rev() {
             for pixel in row {
-                let r = (pixel.r() * 255.99) as u8;
-                let g = (pixel.g() * 255.99) as u8;
-                let b = (pixel.b() * 255.99) as u8;
+                let r = (pixel.r().sqrt() * 255.99) as u8;
+                let g = (pixel.g().sqrt() * 255.99) as u8;
+                let b = (pixel.b().sqrt() * 255.99) as u8;
                 file.write_all(&[r, g, b])?;
             }
         }

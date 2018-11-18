@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<Error>> {
             image.set_pixel(x, y, *p);
         }
         let finished = finished_columns.fetch_add(1, Ordering::SeqCst);
-        println!("{}/{}", finished + 1, width);
+        println!("{:.3}%", (finished + 1) as f32 / width as f32 * 100.);
     });
 
     image.lock().unwrap().save_to_ppm(Path::new("out.ppm"))?;
