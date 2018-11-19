@@ -1,6 +1,6 @@
 # Finales Funkeln
 
-TODO: Insert image here
+![rendered image](assets/demo.jpg "rendered image")
 
 A simple ray tracer based on Peter Shirley's [Ray Tracing in One Weekend][1].
 Written in Rust during [hackaTUM 2018][2] by Boris-Chengbiao Zhou, Daniel

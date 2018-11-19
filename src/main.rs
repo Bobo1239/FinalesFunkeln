@@ -20,9 +20,9 @@ use finales_funkeln::sphere::Sphere;
 use finales_funkeln::vec3::Vec3;
 
 fn main() -> Result<(), Box<Error>> {
-    let width = 640;
-    let height = 480;
-    let samples_per_pixel = 100;
+    let width = 1920;
+    let height = 1080;
+    let samples_per_pixel = 1000;
     let image = Arc::new(Mutex::new(Image::new(width, height)));
     let finished_columns = AtomicUsize::new(0);
 
