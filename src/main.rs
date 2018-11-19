@@ -74,7 +74,8 @@ fn main() -> Result<(), Box<Error>> {
 }
 
 fn color(ray: &Ray, world: &[Box<Hit>], depth: usize) -> Vec3 {
-    match world.hit(ray, 0.0, f32::MAX) {
+    // Set t_min to a value slight above 0 to prevent "shadow acne"
+    match world.hit(ray, 0.001, f32::MAX) {
         None => {
             let unit_direction = ray.direction().unit_vector();
             let t = 0.5 * (unit_direction.y() + 1.0);
