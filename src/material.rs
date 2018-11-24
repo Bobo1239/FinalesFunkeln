@@ -1,6 +1,7 @@
 use hit::HitRecord;
 use ray::Ray;
 use vec3::Vec3;
+use Float;
 
 use rand::Rng;
 
@@ -47,11 +48,11 @@ impl Scatter for Lambertian {
 #[derive(Debug, Clone)]
 pub struct Metal {
     albedo: Vec3,
-    fuzz: f32,
+    fuzz: Float,
 }
 
 impl Metal {
-    pub fn new(albedo: Vec3, fuzz: f32) -> Metal {
+    pub fn new(albedo: Vec3, fuzz: Float) -> Metal {
         assert!(fuzz <= 1.);
         Metal { albedo, fuzz }
     }
@@ -74,11 +75,11 @@ impl Scatter for Metal {
 
 #[derive(Debug, Clone)]
 pub struct Dielectric {
-    ref_idx: f32,
+    ref_idx: Float,
 }
 
 impl Dielectric {
-    pub fn new(ref_idx: f32) -> Dielectric {
+    pub fn new(ref_idx: Float) -> Dielectric {
         Dielectric { ref_idx }
     }
 }
@@ -86,7 +87,7 @@ impl Dielectric {
 impl Scatter for Dielectric {
     fn scatter(&self, r_in: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
         let mut refracted: Vec3 = Vec3::default();
-        let reflect_prob: f32;
+        let reflect_prob: Float;
         let reflected = reflect(&r_in.direction(), &hit_record.normal);
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
         let (outward_normal, ni_over_nt, cosine) = if r_in.direction().dot(&hit_record.normal) > 0.0
@@ -112,7 +113,7 @@ impl Scatter for Dielectric {
             }
             None => reflect_prob = 1.0,
         }
-        if rand::thread_rng().gen::<f32>() < reflect_prob {
+        if rand::thread_rng().gen::<Float>() < reflect_prob {
             Some((Ray::new(hit_record.p, reflected), attenuation))
         } else {
             Some((Ray::new(hit_record.p, refracted), attenuation))
@@ -120,13 +121,13 @@ impl Scatter for Dielectric {
     }
 }
 
-fn schlick(cosine: f32, ref_idx: f32) -> f32 {
+fn schlick(cosine: Float, ref_idx: Float) -> Float {
     let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
     r0 = r0 * r0;
     (r0 + (1.0 - r0) * (1.0 - cosine).powi(5))
 }
 
-fn refract(v: &Vec3, n: &Vec3, ni_over_nt: f32) -> Option<Vec3> {
+fn refract(v: &Vec3, n: &Vec3, ni_over_nt: Float) -> Option<Vec3> {
     let uv = v.unit_vector();
     let dt = uv.dot(n);
     let discriminant = 1.0 - ni_over_nt * ni_over_nt * (1.0 - dt * dt);

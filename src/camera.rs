@@ -1,4 +1,5 @@
-use std::f32::consts::PI;
+use float::consts::PI;
+use Float;
 
 use rand::Rng;
 
@@ -13,7 +14,7 @@ pub struct Camera {
     vertical: Vec3,
     u: Vec3,
     v: Vec3,
-    lens_radius: f32,
+    lens_radius: Float,
 }
 
 impl Camera {
@@ -21,10 +22,10 @@ impl Camera {
         origin: Vec3,
         look_at: Vec3,
         up: Vec3,
-        vertical_fov: f32,
-        aspect: f32,
-        aperture: f32,
-        focus_distance: f32,
+        vertical_fov: Float,
+        aspect: Float,
+        aperture: Float,
+        focus_distance: Float,
     ) -> Camera {
         // The image plane is 1 unit away from the camera origin
         let theta = vertical_fov * PI / 180.;
@@ -49,7 +50,7 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, s: f32, t: f32) -> Ray {
+    pub fn get_ray(&self, s: Float, t: Float) -> Ray {
         let rd = self.lens_radius * random_in_unit_disk();
         let offset = self.u * rd.x() + self.v * rd.y();
         Ray::new(

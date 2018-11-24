@@ -1,49 +1,51 @@
 use std::fmt::{self, Display, Formatter};
 use std::ops::*;
 
+use Float;
+
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {
-    x: f32,
-    y: f32,
-    z: f32,
+    x: Float,
+    y: Float,
+    z: Float,
 }
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
+    pub fn new(x: Float, y: Float, z: Float) -> Vec3 {
         Vec3 { x, y, z }
     }
 
-    pub fn x(&self) -> f32 {
+    pub fn x(&self) -> Float {
         self.x
     }
 
-    pub fn y(&self) -> f32 {
+    pub fn y(&self) -> Float {
         self.y
     }
 
-    pub fn z(&self) -> f32 {
+    pub fn z(&self) -> Float {
         self.z
     }
 
-    pub fn r(&self) -> f32 {
+    pub fn r(&self) -> Float {
         self.x
     }
 
-    pub fn g(&self) -> f32 {
+    pub fn g(&self) -> Float {
         self.y
     }
 
-    pub fn b(&self) -> f32 {
+    pub fn b(&self) -> Float {
         self.z
     }
 }
 
 impl Vec3 {
-    pub fn length(&self) -> f32 {
+    pub fn length(&self) -> Float {
         self.length_squared().sqrt()
     }
 
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> Float {
         self.x().powi(2) + self.y().powi(2) + self.z().powi(2)
     }
 
@@ -55,7 +57,7 @@ impl Vec3 {
         *self /= self.length()
     }
 
-    pub fn dot(&self, other: &Vec3) -> f32 {
+    pub fn dot(&self, other: &Vec3) -> Float {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
@@ -69,8 +71,8 @@ impl Vec3 {
 }
 
 impl Index<usize> for Vec3 {
-    type Output = f32;
-    fn index(&self, idx: usize) -> &f32 {
+    type Output = Float;
+    fn index(&self, idx: usize) -> &Float {
         match idx {
             0 => &self.x,
             1 => &self.y,
@@ -81,7 +83,7 @@ impl Index<usize> for Vec3 {
 }
 
 impl IndexMut<usize> for Vec3 {
-    fn index_mut(&mut self, idx: usize) -> &mut f32 {
+    fn index_mut(&mut self, idx: usize) -> &mut Float {
         match idx {
             0 => &mut self.x,
             1 => &mut self.y,
@@ -146,9 +148,9 @@ impl Div for Vec3 {
     }
 }
 
-impl Mul<f32> for Vec3 {
+impl Mul<Float> for Vec3 {
     type Output = Vec3;
-    fn mul(self, t: f32) -> Vec3 {
+    fn mul(self, t: Float) -> Vec3 {
         Vec3 {
             x: self.x * t,
             y: self.y * t,
@@ -157,9 +159,9 @@ impl Mul<f32> for Vec3 {
     }
 }
 
-impl Div<f32> for Vec3 {
+impl Div<Float> for Vec3 {
     type Output = Vec3;
-    fn div(self, t: f32) -> Vec3 {
+    fn div(self, t: Float) -> Vec3 {
         Vec3 {
             x: self.x / t,
             y: self.y / t,
@@ -168,7 +170,7 @@ impl Div<f32> for Vec3 {
     }
 }
 
-impl Mul<Vec3> for f32 {
+impl Mul<Vec3> for Float {
     type Output = Vec3;
     fn mul(self, other: Vec3) -> Vec3 {
         Vec3 {
@@ -211,16 +213,16 @@ impl DivAssign for Vec3 {
     }
 }
 
-impl MulAssign<f32> for Vec3 {
-    fn mul_assign(&mut self, t: f32) {
+impl MulAssign<Float> for Vec3 {
+    fn mul_assign(&mut self, t: Float) {
         self.x *= t;
         self.y *= t;
         self.z *= t;
     }
 }
 
-impl DivAssign<f32> for Vec3 {
-    fn div_assign(&mut self, t: f32) {
+impl DivAssign<Float> for Vec3 {
+    fn div_assign(&mut self, t: Float) {
         self.x /= t;
         self.y /= t;
         self.z /= t;

@@ -10,7 +10,6 @@ additional features added after the event.
 
 ## Future Work
 - Document parts of the code
-- Add the ability to choose between `f32` and `f64`
 - Implement features from the sequel book: [Ray Tracing: the Next Week][3]
 - Spectral rendering
 - Profile & Optimize

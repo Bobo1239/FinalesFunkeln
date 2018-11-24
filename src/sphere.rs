@@ -2,16 +2,17 @@ use hit::{Hit, HitRecord};
 use material::Material;
 use ray::Ray;
 use vec3::Vec3;
+use Float;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
     center: Vec3,
-    radius: f32,
+    radius: Float,
     material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f32, material: Material) -> Sphere {
+    pub fn new(center: Vec3, radius: Float, material: Material) -> Sphere {
         Sphere {
             center,
             radius,
@@ -23,14 +24,14 @@ impl Sphere {
         self.center
     }
 
-    pub fn radius(&self) -> f32 {
+    pub fn radius(&self) -> Float {
         self.radius
     }
 }
 
 impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-        fn calculate_hit_record<'a>(ray: &Ray, t: f32, s: &'a Sphere) -> HitRecord<'a> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+        fn calculate_hit_record<'a>(ray: &Ray, t: Float, s: &'a Sphere) -> HitRecord<'a> {
             let p = ray.point_at_parameter(t);
             HitRecord {
                 t,

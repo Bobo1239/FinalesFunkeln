@@ -1,4 +1,5 @@
 use vec3::Vec3;
+use Float;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
@@ -21,7 +22,7 @@ impl Ray {
 }
 
 impl Ray {
-    pub fn point_at_parameter(&self, t: f32) -> Vec3 {
+    pub fn point_at_parameter(&self, t: Float) -> Vec3 {
         self.origin + t * self.direction
     }
 }
