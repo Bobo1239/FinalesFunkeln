@@ -11,7 +11,7 @@ use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 use rayon::prelude::*;
 
-use finales_funkeln::camera::Camera;
+use finales_funkeln::camera::{Camera, CameraParameters};
 use finales_funkeln::float;
 use finales_funkeln::hit::Hit;
 use finales_funkeln::image::Image;
@@ -32,21 +32,15 @@ fn main() -> Result<(), Box<Error>> {
         let origin = Vec3::new(13., 2., 3.);
         let look_at = Vec3::new(0., 0., 0.);
         let up = Vec3::new(0., 1., 0.);
-        let vertical_fov = 20.;
-        let aspect_ratio = width as Float / height as Float;
-        let aperture = 0.1;
-        let focus_distance = 10.;
-        Camera::new(
-            origin,
-            look_at,
-            up,
-            vertical_fov,
-            aspect_ratio,
-            aperture,
-            focus_distance,
-            0.0,
-            1.0,
-        )
+        let time = 0.0;
+        let parameters = CameraParameters {
+            aspect_ratio: width as Float / height as Float,
+            vertical_fov: 20.,
+            focus_distance: 10.,
+            aperture: 0.1,
+            exposure_time: 1.0,
+        };
+        Camera::new(origin, look_at, up, parameters, time)
     };
     let hit_list = random_scene();
 

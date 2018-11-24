@@ -15,8 +15,17 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     lens_radius: Float,
-    t_start: Float,
-    exposure_time: Float,
+    time: Float,
+    parameters: CameraParameters,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct CameraParameters {
+    pub aspect_ratio: Float,
+    pub vertical_fov: Float,
+    pub focus_distance: Float,
+    pub aperture: Float,
+    pub exposure_time: Float,
 }
 
 impl Camera {
@@ -24,17 +33,15 @@ impl Camera {
         origin: Vec3,
         look_at: Vec3,
         up: Vec3,
-        vertical_fov: Float,
-        aspect: Float,
-        aperture: Float,
-        focus_distance: Float,
-        t_start: Float,
-        exposure_time: Float,
+        parameters: CameraParameters,
+        time: Float,
     ) -> Camera {
+        let p = parameters;
+
         // The image plane is 1 unit away from the camera origin
-        let theta = vertical_fov * PI / 180.;
+        let theta = p.vertical_fov * PI / 180.;
         let half_height = (theta / 2.).tan();
-        let half_width = aspect * half_height;
+        let half_width = p.aspect_ratio * half_height;
 
         let w = (origin - look_at).unit_vector();
         let u = up.cross(&w).unit_vector();
@@ -43,16 +50,16 @@ impl Camera {
         Camera {
             origin,
             lower_left_corner: origin
-                - half_width * focus_distance * u
-                - half_height * focus_distance * v
-                - focus_distance * w,
-            horizontal: 2. * half_width * focus_distance * u,
-            vertical: 2. * half_height * focus_distance * v,
+                - half_width * p.focus_distance * u
+                - half_height * p.focus_distance * v
+                - p.focus_distance * w,
+            horizontal: 2. * half_width * p.focus_distance * u,
+            vertical: 2. * half_height * p.focus_distance * v,
             u,
             v,
-            lens_radius: aperture / 2.,
-            t_start,
-            exposure_time,
+            lens_radius: p.aperture / 2.,
+            time,
+            parameters: p,
         }
     }
 
@@ -62,7 +69,7 @@ impl Camera {
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
-            self.t_start + rng.gen::<Float>() * self.exposure_time,
+            self.time + rng.gen::<Float>() * self.parameters.exposure_time,
         )
     }
 }
