@@ -38,9 +38,9 @@ impl Lambertian {
 }
 
 impl Scatter for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
+    fn scatter(&self, ray: &Ray, hit_record: &HitRecord) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere();
-        let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p);
+        let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p, ray.time());
         Some((scattered, self.albedo))
     }
 }
@@ -64,6 +64,7 @@ impl Scatter for Metal {
         let scattered = Ray::new(
             hit_record.p,
             reflected + self.fuzz * random_in_unit_sphere(),
+            ray.time(),
         );
         if scattered.direction().dot(&hit_record.normal) > 0.0 {
             Some((scattered, self.albedo))
@@ -113,11 +114,12 @@ impl Scatter for Dielectric {
             }
             None => reflect_prob = 1.0,
         }
-        if rand::thread_rng().gen::<Float>() < reflect_prob {
-            Some((Ray::new(hit_record.p, reflected), attenuation))
+        let direction = if rand::thread_rng().gen::<Float>() < reflect_prob {
+            reflected
         } else {
-            Some((Ray::new(hit_record.p, refracted), attenuation))
-        }
+            refracted
+        };
+        Some((Ray::new(hit_record.p, direction, r_in.time()), attenuation))
     }
 }
 

@@ -15,6 +15,8 @@ pub struct Camera {
     u: Vec3,
     v: Vec3,
     lens_radius: Float,
+    t_start: Float,
+    exposure_time: Float,
 }
 
 impl Camera {
@@ -26,6 +28,8 @@ impl Camera {
         aspect: Float,
         aperture: Float,
         focus_distance: Float,
+        t_start: Float,
+        exposure_time: Float,
     ) -> Camera {
         // The image plane is 1 unit away from the camera origin
         let theta = vertical_fov * PI / 180.;
@@ -47,6 +51,8 @@ impl Camera {
             u,
             v,
             lens_radius: aperture / 2.,
+            t_start,
+            exposure_time,
         }
     }
 
@@ -56,6 +62,7 @@ impl Camera {
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
+            self.t_start + rand::thread_rng().gen::<Float>() * self.exposure_time,
         )
     }
 }

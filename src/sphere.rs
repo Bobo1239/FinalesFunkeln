@@ -9,6 +9,7 @@ pub struct Sphere {
     center: Vec3,
     radius: Float,
     material: Material,
+    motion_vector: Option<Vec3>,
 }
 
 impl Sphere {
@@ -17,11 +18,34 @@ impl Sphere {
             center,
             radius,
             material,
+            motion_vector: None,
+        }
+    }
+
+    pub fn new_moving(
+        center: Vec3,
+        radius: Float,
+        material: Material,
+        motion_vector: Vec3,
+    ) -> Sphere {
+        Sphere {
+            center,
+            radius,
+            material,
+            motion_vector: Some(motion_vector),
         }
     }
 
     pub fn center(&self) -> Vec3 {
         self.center
+    }
+
+    pub fn center_at_time(&self, t: Float) -> Vec3 {
+        if let Some(motion_vector) = self.motion_vector {
+            self.center + t * motion_vector
+        } else {
+            self.center
+        }
     }
 
     pub fn radius(&self) -> Float {
@@ -36,12 +60,12 @@ impl Hit for Sphere {
             HitRecord {
                 t,
                 p,
-                normal: (p - s.center()) / s.radius(),
+                normal: (p - s.center_at_time(ray.time())) / s.radius(),
                 material: &s.material,
             }
         }
 
-        let oc = ray.origin() - self.center;
+        let oc = ray.origin() - self.center_at_time(ray.time());
         let a = ray.direction().dot(&ray.direction());
         let b = oc.dot(&ray.direction());
         let c = oc.dot(&oc) - self.radius * self.radius;

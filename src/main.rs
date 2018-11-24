@@ -43,6 +43,8 @@ fn main() -> Result<(), Box<Error>> {
             aspect_ratio,
             aperture,
             focus_distance,
+            0.0,
+            1.0,
         )
     };
     let hit_list = random_scene();
@@ -128,7 +130,12 @@ fn random_scene() -> Vec<Box<Hit>> {
                 } else {
                     Material::Dielectric(Dielectric::new(1.5))
                 };
-                list.push(Box::new(Sphere::new(center, 0.2, material)));
+                list.push(Box::new(Sphere::new_moving(
+                    center,
+                    0.2,
+                    material,
+                    Vec3::new(0., 0.5 * rng.gen::<Float>(), 0.),
+                )));
             }
         }
     }
