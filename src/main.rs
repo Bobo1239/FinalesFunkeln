@@ -1,12 +1,13 @@
 extern crate finales_funkeln;
+extern crate indicatif;
 extern crate rand;
 extern crate rayon;
 
 use std::error::Error;
 use std::path::Path;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
+use indicatif::{ProgressBar, ProgressStyle};
 use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 use rayon::prelude::*;
@@ -26,7 +27,6 @@ fn main() -> Result<(), Box<Error>> {
     let height = 1080;
     let samples_per_pixel = 1000;
     let image = Arc::new(Mutex::new(Image::new(width, height)));
-    let finished_columns = AtomicUsize::new(0);
 
     let camera = {
         let origin = Vec3::new(13., 2., 3.);
@@ -43,6 +43,16 @@ fn main() -> Result<(), Box<Error>> {
         Camera::new(origin, look_at, up, parameters, time)
     };
     let hit_list = random_scene();
+
+    let progress_bar = ProgressBar::new(width as u64);
+    progress_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner} {elapsed_precise}/{eta_precise} {wide_bar} {percent:3}%"),
+    );
+    progress_bar.enable_steady_tick(100);
+    // Tick once so the spinner starts (otherwise it doesn't move until the first state update)
+    // See: https://github.com/mitsuhiko/indicatif/issues/36
+    progress_bar.tick();
 
     (0..width).into_par_iter().for_each(|x| {
         // TODO: Use xoshiro256** once https://github.com/rust-random/rand/pull/642
@@ -64,9 +74,9 @@ fn main() -> Result<(), Box<Error>> {
         for (y, p) in column.iter().enumerate() {
             image.set_pixel(x, y, *p);
         }
-        let finished = finished_columns.fetch_add(1, Ordering::SeqCst);
-        println!("{:.3}%", (finished + 1) as Float / width as Float * 100.);
+        progress_bar.inc(1);
     });
+    progress_bar.finish();
 
     image.lock().unwrap().save_to_ppm(Path::new("out.ppm"))?;
 
