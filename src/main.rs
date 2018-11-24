@@ -7,7 +7,8 @@ use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
-use rand::Rng;
+use rand::rngs::SmallRng;
+use rand::{FromEntropy, Rng};
 use rayon::prelude::*;
 
 use finales_funkeln::camera::Camera;
@@ -50,7 +51,9 @@ fn main() -> Result<(), Box<Error>> {
     let hit_list = random_scene();
 
     (0..width).into_par_iter().for_each(|x| {
-        let mut rng = rand::thread_rng();
+        // TODO: Use xoshiro256** once https://github.com/rust-random/rand/pull/642
+        //       is in rand release.
+        let mut rng = SmallRng::from_entropy();
         let mut column = Vec::with_capacity(height);
         for y in 0..height {
             let mut color_acc = Vec3::new(0., 0., 0.);
@@ -58,8 +61,8 @@ fn main() -> Result<(), Box<Error>> {
                 let s = (x as Float + rng.gen::<Float>()) / width as Float;
                 let t = (y as Float + rng.gen::<Float>()) / height as Float;
 
-                let ray = camera.get_ray(s, t);
-                color_acc += color(&ray, &hit_list, 0);
+                let ray = camera.get_ray(s, t, &mut rng);
+                color_acc += color(&ray, &hit_list, 0, &mut rng);
             }
             column.push(color_acc / samples_per_pixel as Float);
         }
@@ -76,7 +79,7 @@ fn main() -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn color(ray: &Ray, world: &[Box<Hit>], depth: usize) -> Vec3 {
+fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Vec3 {
     // Set t_min to a value slight above 0 to prevent "shadow acne"
     match world.hit(ray, 0.001, float::MAX) {
         None => {
@@ -84,9 +87,12 @@ fn color(ray: &Ray, world: &[Box<Hit>], depth: usize) -> Vec3 {
             let t = 0.5 * (unit_direction.y() + 1.0);
             (1.0 - t) * Vec3::new(1., 1., 1.) + t * Vec3::new(0.5, 0.7, 1.0)
         }
-        Some(hit_record) => match (depth < 50, hit_record.material.scatter(ray, &hit_record)) {
+        Some(hit_record) => match (
+            depth < 50,
+            hit_record.material.scatter(ray, &hit_record, rng),
+        ) {
             (true, Some((scattered, attenuation))) => {
-                attenuation * color(&scattered, world, depth + 1)
+                attenuation * color(&scattered, world, depth + 1, rng)
             }
             _ => Vec3::new(0., 0., 0.),
         },
@@ -94,7 +100,7 @@ fn color(ray: &Ray, world: &[Box<Hit>], depth: usize) -> Vec3 {
 }
 
 fn random_scene() -> Vec<Box<Hit>> {
-    let mut rng = rand::thread_rng();
+    let mut rng = SmallRng::from_entropy();
     let mut list: Vec<Box<Hit>> = Vec::new();
 
     list.push(Box::new(Sphere::new(

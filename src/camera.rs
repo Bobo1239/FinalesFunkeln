@@ -56,19 +56,18 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, s: Float, t: Float) -> Ray {
-        let rd = self.lens_radius * random_in_unit_disk();
+    pub fn get_ray<T: Rng>(&self, s: Float, t: Float, rng: &mut T) -> Ray {
+        let rd = self.lens_radius * random_in_unit_disk(rng);
         let offset = self.u * rd.x() + self.v * rd.y();
         Ray::new(
             self.origin + offset,
             self.lower_left_corner + s * self.horizontal + t * self.vertical - self.origin - offset,
-            self.t_start + rand::thread_rng().gen::<Float>() * self.exposure_time,
+            self.t_start + rng.gen::<Float>() * self.exposure_time,
         )
     }
 }
 
-fn random_in_unit_disk() -> Vec3 {
-    let mut rng = rand::thread_rng();
+fn random_in_unit_disk<T: Rng>(rng: &mut T) -> Vec3 {
     loop {
         let p = 2.0 * Vec3::new(rng.gen(), rng.gen(), 0.) - Vec3::new(1., 1., 0.);
         if p.dot(&p) < 1.0 {
