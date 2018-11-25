@@ -3,7 +3,7 @@ extern crate indicatif;
 extern crate rand;
 extern crate rayon;
 
-use std::error::Error;
+use std::io;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -22,7 +22,7 @@ use finales_funkeln::ray::Ray;
 use finales_funkeln::sphere::Sphere;
 use finales_funkeln::vec3::Vec3;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), io::Error> {
     let width = 1920;
     let height = 1080;
     let samples_per_pixel = 1000;
