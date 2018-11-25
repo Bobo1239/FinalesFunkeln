@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::error::Error;
 use std::fmt;
 
@@ -12,7 +13,6 @@ use vec3::Vec3;
 
 #[derive(Debug)]
 pub enum BvhError {
-    // TODO: The first two variants are currently unused; See comment below...
     MissingBoundingBox,
     InvalidBoundingBox,
     TooFewElements(u8),
@@ -56,18 +56,40 @@ impl Bvh {
         let mut rng = SmallRng::from_entropy();
 
         let axis = rng.gen_range(0, 3);
+        let mut error = None;
         hit_list.sort_unstable_by(|a, b| {
-            // TODO: Ideally we'd return a Result but this doesn't work due to this being a closure
-            let a_aabb = a
+            // The error handling is a bit awkward here because this is a closure.
+            // We don't really care about performance issues here as the BVH will only be
+            // constructed once anyways.
+            let result = a
                 .bounding_box(time_start, time_end)
-                .expect("object without bounding box in Bvh::new");
-            let b_aabb = b
-                .bounding_box(time_start, time_end)
-                .expect("object without bounding box in Bvh::new");
-            a_aabb.min[axis]
-                .partial_cmp(&b_aabb.min[axis])
-                .expect("partial_cmp failed in Bvh::new")
+                .ok_or(BvhError::MissingBoundingBox)
+                .and_then(|a_aabb| {
+                    Ok((
+                        a_aabb,
+                        b.bounding_box(time_start, time_end)
+                            .ok_or(BvhError::MissingBoundingBox)?,
+                    ))
+                })
+                .and_then(|(a_aabb, b_aabb)| {
+                    a_aabb.min[axis]
+                        .partial_cmp(&b_aabb.min[axis])
+                        .ok_or(BvhError::InvalidBoundingBox)
+                });
+            match result {
+                Ok(cmp) => cmp,
+                Err(e) => {
+                    if error.is_none() {
+                        error = Some(e);
+                    }
+                    // Just return any Ordering as we'll exit anyways.
+                    Ordering::Less
+                }
+            }
         });
+        if let Some(error) = error {
+            return Err(error);
+        }
 
         let (left, right) = match hit_list.len() {
             0 => return Err(BvhError::TooFewElements(0)),
