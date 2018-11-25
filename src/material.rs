@@ -1,6 +1,8 @@
 use hit::HitRecord;
 use math::float::Float;
 use ray::Ray;
+use texture::Sample;
+use texture::Texture;
 use vec3::Vec3;
 
 use rand::Rng;
@@ -38,12 +40,12 @@ impl Scatter for Material {
 
 #[derive(Debug, Clone)]
 pub struct Lambertian {
-    albedo: Vec3,
+    texture: Texture,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Vec3) -> Lambertian {
-        Lambertian { albedo }
+    pub fn new(texture: Texture) -> Lambertian {
+        Lambertian { texture }
     }
 }
 
@@ -56,7 +58,7 @@ impl Scatter for Lambertian {
     ) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere(rng);
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p, ray.time());
-        Some((scattered, self.albedo))
+        Some((scattered, self.texture.sample(0., 0., &hit_record.p)))
     }
 }
 

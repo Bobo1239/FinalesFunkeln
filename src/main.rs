@@ -20,12 +20,15 @@ use finales_funkeln::material::*;
 use finales_funkeln::math::float::{self, Float};
 use finales_funkeln::ray::Ray;
 use finales_funkeln::sphere::Sphere;
+use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
 
 fn main() -> Result<(), Box<Error>> {
-    let width = 1920;
-    let height = 1080;
-    let samples_per_pixel = 1000;
+    let (width, height, samples_per_pixel) = if true {
+        (1920, 1080, 1000)
+    } else {
+        (720, 480, 100)
+    };
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
     let camera = {
@@ -110,7 +113,11 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     list.push(Box::new(Sphere::new(
         Vec3::new(0., -1000., 0.),
         1000.,
-        Material::Lambertian(Lambertian::new(Vec3::new(0.5, 0.5, 0.5))),
+        Material::Lambertian(Lambertian::new(Texture::checker_board(
+            Texture::constant(Vec3::new(0.2, 0.3, 0.1)),
+            Texture::constant(Vec3::new(0.9, 0.9, 0.9)),
+            0.1,
+        ))),
     )));
 
     for a in -11..=11 {
@@ -123,11 +130,11 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
             );
             if (center - Vec3::new(4., 0.2, 0.)).length() > 0.9 {
                 let material = if choose_mat < 0.8 {
-                    Material::Lambertian(Lambertian::new(Vec3::new(
+                    Material::Lambertian(Lambertian::new(Texture::constant(Vec3::new(
                         rng.gen::<Float>() * rng.gen::<Float>(),
                         rng.gen::<Float>() * rng.gen::<Float>(),
                         rng.gen::<Float>() * rng.gen::<Float>(),
-                    )))
+                    ))))
                 } else if choose_mat < 0.95 {
                     Material::Metal(Metal::new(
                         Vec3::new(
@@ -158,7 +165,7 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     list.push(Box::new(Sphere::new(
         Vec3::new(-4., 1., 0.),
         1.,
-        Material::Lambertian(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))),
+        Material::Lambertian(Lambertian::new(Texture::constant(Vec3::new(0.4, 0.2, 0.1)))),
     )));
     list.push(Box::new(Sphere::new(
         Vec3::new(4., 1., 0.),

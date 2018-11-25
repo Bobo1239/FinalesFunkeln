@@ -8,4 +8,5 @@ pub mod material;
 pub mod math;
 pub mod ray;
 pub mod sphere;
+pub mod texture;
 pub mod vec3;
