@@ -113,11 +113,11 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     list.push(Box::new(Sphere::new(
         Vec3::new(0., -1000., 0.),
         1000.,
-        Material::Lambertian(Lambertian::new(Texture::checker_board(
+        Material::lambertian(Texture::checker_board(
             Texture::constant(Vec3::new(0.2, 0.3, 0.1)),
             Texture::constant(Vec3::new(0.9, 0.9, 0.9)),
             0.1,
-        ))),
+        )),
     )));
 
     for a in -11..=11 {
@@ -130,22 +130,22 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
             );
             if (center - Vec3::new(4., 0.2, 0.)).length() > 0.9 {
                 let material = if choose_mat < 0.8 {
-                    Material::Lambertian(Lambertian::new(Texture::constant(Vec3::new(
+                    Material::lambertian(Texture::constant(Vec3::new(
                         rng.gen::<Float>() * rng.gen::<Float>(),
                         rng.gen::<Float>() * rng.gen::<Float>(),
                         rng.gen::<Float>() * rng.gen::<Float>(),
-                    ))))
+                    )))
                 } else if choose_mat < 0.95 {
-                    Material::Metal(Metal::new(
+                    Material::metal(
                         Vec3::new(
                             0.5 * (1. + rng.gen::<Float>()),
                             0.5 * (1. + rng.gen::<Float>()),
                             0.5 * (1. + rng.gen::<Float>()),
                         ),
                         0.5 * rng.gen::<Float>(),
-                    ))
+                    )
                 } else {
-                    Material::Dielectric(Dielectric::new(1.5))
+                    Material::dielectric(1.5)
                 };
                 list.push(Box::new(Sphere::new_moving(
                     center,
@@ -160,17 +160,17 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     list.push(Box::new(Sphere::new(
         Vec3::new(0., 1., 0.),
         1.,
-        Material::Dielectric(Dielectric::new(1.5)),
+        Material::dielectric(1.5),
     )));
     list.push(Box::new(Sphere::new(
         Vec3::new(-4., 1., 0.),
         1.,
-        Material::Lambertian(Lambertian::new(Texture::constant(Vec3::new(0.4, 0.2, 0.1)))),
+        Material::lambertian(Texture::constant(Vec3::new(0.4, 0.2, 0.1))),
     )));
     list.push(Box::new(Sphere::new(
         Vec3::new(4., 1., 0.),
         1.,
-        Material::Metal(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.)),
+        Material::metal(Vec3::new(0.7, 0.6, 0.5), 0.),
     )));
 
     Bvh::new(list, time_start, time_end)

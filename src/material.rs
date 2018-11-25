@@ -23,6 +23,20 @@ pub enum Material {
     Dielectric(Dielectric),
 }
 
+impl Material {
+    pub fn lambertian(texture: Texture) -> Material {
+        Material::Lambertian(Lambertian::new(texture))
+    }
+
+    pub fn metal(albedo: Vec3, fuzz: Float) -> Material {
+        Material::Metal(Metal::new(albedo, fuzz))
+    }
+
+    pub fn dielectric(ref_idx: Float) -> Material {
+        Material::Dielectric(Dielectric::new(ref_idx))
+    }
+}
+
 impl Scatter for Material {
     fn scatter<T: Rng>(
         &self,
