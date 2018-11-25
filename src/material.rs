@@ -1,7 +1,7 @@
 use hit::HitRecord;
+use math::float::Float;
 use ray::Ray;
 use vec3::Vec3;
-use Float;
 
 use rand::Rng;
 

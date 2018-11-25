@@ -1,5 +1,5 @@
+use math::float::Float;
 use vec3::Vec3;
-use Float;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {

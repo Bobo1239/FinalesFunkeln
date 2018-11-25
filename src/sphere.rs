@@ -1,8 +1,9 @@
+use bvh::Aabb;
 use hit::{Hit, HitRecord};
 use material::Material;
+use math::float::Float;
 use ray::Ray;
 use vec3::Vec3;
-use Float;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
@@ -81,5 +82,18 @@ impl Hit for Sphere {
             }
         }
         None
+    }
+
+    fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
+        let radius = Vec3::new(self.radius, self.radius, self.radius);
+        let center_start = self.center_at_time(time_start);
+        let aabb_0 = Aabb::new(center_start - radius, center_start + radius);
+        if self.motion_vector.is_some() {
+            let center_end = self.center_at_time(time_end);
+            let aabb_1 = Aabb::new(center_end - radius, center_end + radius);
+            Some(aabb_0.union(&aabb_1))
+        } else {
+            Some(aabb_0)
+        }
     }
 }

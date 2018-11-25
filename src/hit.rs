@@ -1,10 +1,14 @@
+use std::fmt::Debug;
+
+use bvh::Aabb;
 use material::Material;
+use math::float::Float;
 use ray::Ray;
 use vec3::Vec3;
-use Float;
 
-pub trait Hit: Sync + Send {
+pub trait Hit: Sync + Send + Debug {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
+    fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb>;
 }
 
 pub struct HitRecord<'a> {
@@ -27,5 +31,22 @@ impl Hit for [Box<Hit>] {
                 }
             })
             .0
+    }
+
+    fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut aabb = Aabb::empty();
+        for hit in self {
+            if let Some(new_aabb) = hit.bounding_box(time_start, time_end) {
+                aabb = aabb.union(&new_aabb)
+            } else {
+                return None;
+            }
+        }
+
+        Some(aabb)
     }
 }

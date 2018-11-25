@@ -1,7 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 use std::ops::*;
 
-use Float;
+use math::float::Float;
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec3 {

@@ -1,5 +1,5 @@
-use float::consts::PI;
-use Float;
+use math::float::consts::PI;
+use math::float::Float;
 
 use rand::Rng;
 

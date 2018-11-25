@@ -12,15 +12,15 @@ use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 use rayon::prelude::*;
 
+use finales_funkeln::bvh::Bvh;
 use finales_funkeln::camera::{Camera, CameraParameters};
-use finales_funkeln::float;
 use finales_funkeln::hit::Hit;
 use finales_funkeln::image::Image;
 use finales_funkeln::material::*;
+use finales_funkeln::math::float::{self, Float};
 use finales_funkeln::ray::Ray;
 use finales_funkeln::sphere::Sphere;
 use finales_funkeln::vec3::Vec3;
-use finales_funkeln::Float;
 
 fn main() -> Result<(), Box<Error>> {
     let width = 1920;
@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<Error>> {
         };
         Camera::new(origin, look_at, up, parameters, time)
     };
-    let hit_list = random_scene();
+    let hit_list = vec![Box::new(random_scene(0.0, 1.0)) as Box<Hit>];
 
     let progress_bar = ProgressBar::new(width as u64);
     progress_bar.set_style(
@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<Error>> {
 }
 
 fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Vec3 {
-    // Set t_min to a value slight above 0 to prevent "shadow acne"
+    // Set t_min to a value slightly above 0 to prevent "shadow acne"
     match world.hit(ray, 0.001, float::MAX) {
         None => {
             let unit_direction = ray.direction().unit_vector();
@@ -103,7 +103,7 @@ fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Ve
     }
 }
 
-fn random_scene() -> Vec<Box<Hit>> {
+fn random_scene(time_start: Float, time_end: Float) -> Bvh {
     let mut rng = SmallRng::from_entropy();
     let mut list: Vec<Box<Hit>> = Vec::new();
 
@@ -166,5 +166,5 @@ fn random_scene() -> Vec<Box<Hit>> {
         Material::Metal(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.)),
     )));
 
-    list
+    Bvh::new(list, time_start, time_end)
 }
