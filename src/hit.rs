@@ -13,6 +13,8 @@ pub trait Hit: Sync + Send + Debug {
 
 pub struct HitRecord<'a> {
     pub t: Float,
+    pub u: Float,
+    pub v: Float,
     pub p: Vec3,
     pub normal: Vec3,
     pub material: &'a Material,

@@ -89,20 +89,21 @@ fn main() -> Result<(), Box<Error>> {
 fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Vec3 {
     // Set t_min to a value slightly above 0 to prevent "shadow acne"
     match world.hit(ray, 0.001, float::MAX) {
-        None => {
-            let unit_direction = ray.direction().unit_vector();
-            let t = 0.5 * (unit_direction.y() + 1.0);
-            (1.0 - t) * Vec3::new(1., 1., 1.) + t * Vec3::new(0.5, 0.7, 1.0)
-        }
-        Some(hit_record) => match (
-            depth < 50,
-            hit_record.material.scatter(ray, &hit_record, rng),
-        ) {
-            (true, Some((scattered, attenuation))) => {
-                attenuation * color(&scattered, world, depth + 1, rng)
+        None => Vec3::zero(),
+        Some(hit_record) => {
+            let emitted = hit_record
+                .material
+                .emit(hit_record.u, hit_record.v, &hit_record.p);
+            match (
+                depth < 50,
+                hit_record.material.scatter(ray, &hit_record, rng),
+            ) {
+                (true, Some((scattered, attenuation))) => {
+                    emitted + attenuation * color(&scattered, world, depth + 1, rng)
+                }
+                _ => emitted,
             }
-            _ => Vec3::new(0., 0., 0.),
-        },
+        }
     }
 }
 
@@ -171,6 +172,12 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
         Vec3::new(4., 1., 0.),
         1.,
         Material::metal(Vec3::new(0.7, 0.6, 0.5), 0.),
+    )));
+
+    list.push(Box::new(Sphere::new(
+        Vec3::new(-4., 3.5, 0.),
+        1.,
+        Material::diffuse_light(Texture::constant(Vec3::new(6., 6., 6.))),
     )));
 
     Bvh::new(list, time_start, time_end)

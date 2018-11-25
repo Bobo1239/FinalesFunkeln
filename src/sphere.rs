@@ -1,6 +1,7 @@
 use bvh::Aabb;
 use hit::{Hit, HitRecord};
 use material::Material;
+use math::float::consts::{FRAC_PI_2, PI};
 use math::float::Float;
 use ray::Ray;
 use vec3::Vec3;
@@ -56,13 +57,16 @@ impl Sphere {
 
 impl Hit for Sphere {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
-        fn calculate_hit_record<'a>(ray: &Ray, t: Float, s: &'a Sphere) -> HitRecord<'a> {
+        fn calculate_hit_record<'a>(ray: &Ray, t: Float, sphere: &'a Sphere) -> HitRecord<'a> {
             let p = ray.point_at_parameter(t);
+            let (u, v) = sphere_uv(&p);
             HitRecord {
                 t,
+                u,
+                v,
                 p,
-                normal: (p - s.center_at_time(ray.time())) / s.radius(),
-                material: &s.material,
+                normal: (p - sphere.center_at_time(ray.time())) / sphere.radius(),
+                material: &sphere.material,
             }
         }
 
@@ -96,4 +100,10 @@ impl Hit for Sphere {
             Some(aabb_0)
         }
     }
+}
+
+fn sphere_uv(p: &Vec3) -> (Float, Float) {
+    let phi = p.z().atan2(p.x());
+    let theta = p.y().asin();
+    (1. - (phi + PI) / (2. * PI), (theta + FRAC_PI_2) / PI)
 }

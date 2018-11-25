@@ -15,6 +15,10 @@ impl Vec3 {
         Vec3 { x, y, z }
     }
 
+    pub fn zero() -> Vec3 {
+        Vec3::default()
+    }
+
     pub fn x(&self) -> Float {
         self.x
     }

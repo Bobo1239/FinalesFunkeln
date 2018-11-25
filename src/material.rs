@@ -7,13 +7,18 @@ use vec3::Vec3;
 
 use rand::Rng;
 
-pub trait Scatter {
+pub trait MaterialTrait {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
         hit_record: &HitRecord,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)>;
+
+    #[allow(unused_variables)]
+    fn emit(&self, u: Float, v: Float, p: &Vec3) -> Vec3 {
+        Vec3::zero()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -21,6 +26,7 @@ pub enum Material {
     Lambertian(Lambertian),
     Metal(Metal),
     Dielectric(Dielectric),
+    DiffuseLight(DiffuseLight),
 }
 
 impl Material {
@@ -35,9 +41,13 @@ impl Material {
     pub fn dielectric(ref_idx: Float) -> Material {
         Material::Dielectric(Dielectric::new(ref_idx))
     }
+
+    pub fn diffuse_light(texture: Texture) -> Material {
+        Material::DiffuseLight(DiffuseLight::new(texture))
+    }
 }
 
-impl Scatter for Material {
+impl MaterialTrait for Material {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
@@ -48,6 +58,16 @@ impl Scatter for Material {
             Material::Lambertian(lambertian) => lambertian.scatter(ray, hit_record, rng),
             Material::Metal(metal) => metal.scatter(ray, hit_record, rng),
             Material::Dielectric(dielectric) => dielectric.scatter(ray, hit_record, rng),
+            Material::DiffuseLight(diffuse_light) => diffuse_light.scatter(ray, hit_record, rng),
+        }
+    }
+
+    fn emit(&self, u: Float, v: Float, p: &Vec3) -> Vec3 {
+        match self {
+            Material::Lambertian(lambertian) => lambertian.emit(u, v, p),
+            Material::Metal(metal) => metal.emit(u, v, p),
+            Material::Dielectric(dielectric) => dielectric.emit(u, v, p),
+            Material::DiffuseLight(diffuse_light) => diffuse_light.emit(u, v, p),
         }
     }
 }
@@ -63,7 +83,7 @@ impl Lambertian {
     }
 }
 
-impl Scatter for Lambertian {
+impl MaterialTrait for Lambertian {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
@@ -89,7 +109,7 @@ impl Metal {
     }
 }
 
-impl Scatter for Metal {
+impl MaterialTrait for Metal {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
@@ -121,14 +141,14 @@ impl Dielectric {
     }
 }
 
-impl Scatter for Dielectric {
+impl MaterialTrait for Dielectric {
     fn scatter<T: Rng>(
         &self,
         r_in: &Ray,
         hit_record: &HitRecord,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)> {
-        let mut refracted: Vec3 = Vec3::default();
+        let mut refracted: Vec3 = Vec3::zero();
         let reflect_prob: Float;
         let reflected = reflect(&r_in.direction(), &hit_record.normal);
         let attenuation = Vec3::new(1.0, 1.0, 1.0);
@@ -161,6 +181,27 @@ impl Scatter for Dielectric {
             refracted
         };
         Some((Ray::new(hit_record.p, direction, r_in.time()), attenuation))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct DiffuseLight {
+    texture: Texture,
+}
+
+impl DiffuseLight {
+    pub fn new(texture: Texture) -> DiffuseLight {
+        DiffuseLight { texture }
+    }
+}
+
+impl MaterialTrait for DiffuseLight {
+    fn scatter<T: Rng>(&self, _: &Ray, _: &HitRecord, _: &mut T) -> Option<(Ray, Vec3)> {
+        None
+    }
+
+    fn emit(&self, u: Float, v: Float, p: &Vec3) -> Vec3 {
+        self.texture.sample(u, v, p)
     }
 }
 
