@@ -1,3 +1,6 @@
+use std::error::Error;
+use std::fmt;
+
 use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 
@@ -8,6 +11,36 @@ use ray::Ray;
 use vec3::Vec3;
 
 #[derive(Debug)]
+pub enum BvhError {
+    // TODO: The first two variants are currently unused; See comment below...
+    MissingBoundingBox,
+    InvalidBoundingBox,
+    TooFewElements(u8),
+}
+
+impl fmt::Display for BvhError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            BvhError::MissingBoundingBox => write!(
+                f,
+                "Encountered object without bounding box during BVH construction"
+            ),
+            BvhError::InvalidBoundingBox => write!(
+                f,
+                "Encountered object with an invalid bounding box during BVH construction"
+            ),
+            BvhError::TooFewElements(n) => write!(
+                f,
+                "Bvh::new was called with {} objects but at least two objects are required",
+                n
+            ),
+        }
+    }
+}
+
+impl Error for BvhError {}
+
+#[derive(Debug)]
 pub struct Bvh {
     left: Box<Hit>,
     right: Box<Hit>,
@@ -15,12 +48,16 @@ pub struct Bvh {
 }
 
 impl Bvh {
-    pub fn new(mut hit_list: Vec<Box<Hit>>, time_start: Float, time_end: Float) -> Bvh {
-        // TODO: Too many panic!()s in here....
+    pub fn new(
+        mut hit_list: Vec<Box<Hit>>,
+        time_start: Float,
+        time_end: Float,
+    ) -> Result<Bvh, BvhError> {
         let mut rng = SmallRng::from_entropy();
 
         let axis = rng.gen_range(0, 3);
         hit_list.sort_unstable_by(|a, b| {
+            // TODO: Ideally we'd return a Result but this doesn't work due to this being a closure
             let a_aabb = a
                 .bounding_box(time_start, time_end)
                 .expect("object without bounding box in Bvh::new");
@@ -33,8 +70,8 @@ impl Bvh {
         });
 
         let (left, right) = match hit_list.len() {
-            0 => panic!("empty hit_list in Bvh::new"),
-            1 => panic!("single element hit_list in Bvh::new"),
+            0 => return Err(BvhError::TooFewElements(0)),
+            1 => return Err(BvhError::TooFewElements(1)),
             2 => {
                 let right = hit_list.pop().unwrap();
                 let left = hit_list.pop().unwrap();
@@ -42,26 +79,27 @@ impl Bvh {
             }
             3 => {
                 let right = hit_list.pop().unwrap();
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)) as Box<Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<Hit>;
                 (left, right)
             }
             _ => {
-                let hit_list_len = hit_list.len(); // TODO: Not needed after NLL
+                let hit_list_len = hit_list.len(); // TODO: Not needed with NLL
                 let right_half = hit_list.split_off(hit_list_len / 2);
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)) as Box<Hit>;
-                let right = Box::new(Bvh::new(right_half, time_start, time_end)) as Box<Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<Hit>;
+                let right = Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<Hit>;
                 (left, right)
             }
         };
 
-        Bvh {
+        // The `unwrap()`s are safe as we'll only reach this part if all AABBs are valid.
+        Ok(Bvh {
             aabb: left
                 .bounding_box(time_start, time_end)
                 .unwrap()
                 .union(&right.bounding_box(time_start, time_end).unwrap()),
             left,
             right,
-        }
+        })
     }
 }
 

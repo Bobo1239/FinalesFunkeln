@@ -3,7 +3,7 @@ extern crate indicatif;
 extern crate rand;
 extern crate rayon;
 
-use std::io;
+use std::error::Error;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -12,7 +12,7 @@ use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 use rayon::prelude::*;
 
-use finales_funkeln::bvh::Bvh;
+use finales_funkeln::bvh::{Bvh, BvhError};
 use finales_funkeln::camera::{Camera, CameraParameters};
 use finales_funkeln::hit::Hit;
 use finales_funkeln::image::Image;
@@ -22,7 +22,7 @@ use finales_funkeln::ray::Ray;
 use finales_funkeln::sphere::Sphere;
 use finales_funkeln::vec3::Vec3;
 
-fn main() -> Result<(), io::Error> {
+fn main() -> Result<(), Box<Error>> {
     let width = 1920;
     let height = 1080;
     let samples_per_pixel = 1000;
@@ -42,7 +42,7 @@ fn main() -> Result<(), io::Error> {
         };
         Camera::new(origin, look_at, up, parameters, time)
     };
-    let hit_list = vec![Box::new(random_scene(0.0, 1.0)) as Box<Hit>];
+    let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<Hit>];
 
     let progress_bar = ProgressBar::new(width as u64);
     progress_bar.set_style(
@@ -103,7 +103,7 @@ fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Ve
     }
 }
 
-fn random_scene(time_start: Float, time_end: Float) -> Bvh {
+fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     let mut rng = SmallRng::from_entropy();
     let mut list: Vec<Box<Hit>> = Vec::new();
 
