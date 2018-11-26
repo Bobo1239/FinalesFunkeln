@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
 
+use math::partial_min;
 use vec3::Vec3;
 
 /// An image. The origin is at the upper-left corner.
@@ -33,9 +34,9 @@ impl Image {
 
         for row in self.image.iter().rev() {
             for pixel in row {
-                let r = (pixel.r().sqrt() * 255.99) as u8;
-                let g = (pixel.g().sqrt() * 255.99) as u8;
-                let b = (pixel.b().sqrt() * 255.99) as u8;
+                let r = (partial_min(pixel.r().sqrt(), 1.0) * 255.99) as u8;
+                let g = (partial_min(pixel.g().sqrt(), 1.0) * 255.99) as u8;
+                let b = (partial_min(pixel.b().sqrt(), 1.0) * 255.99) as u8;
                 file.write_all(&[r, g, b])?;
             }
         }
