@@ -52,3 +52,20 @@ impl Hit for [Box<Hit>] {
         Some(aabb)
     }
 }
+
+#[derive(Debug)]
+pub struct FlipNormals<T: Hit>(pub T);
+
+impl<T: Hit> Hit for FlipNormals<T> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+        let mut hit_record = self.0.hit(ray, t_min, t_max);
+        hit_record
+            .as_mut()
+            .map(|hit_record| hit_record.normal = -hit_record.normal);
+        hit_record
+    }
+
+    fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
+        self.0.bounding_box(time_start, time_end)
+    }
+}

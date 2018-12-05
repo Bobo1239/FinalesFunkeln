@@ -14,11 +14,12 @@ use rayon::prelude::*;
 
 use finales_funkeln::bvh::{Bvh, BvhError};
 use finales_funkeln::camera::{Camera, CameraParameters};
-use finales_funkeln::hit::Hit;
+use finales_funkeln::hit::{FlipNormals, Hit};
 use finales_funkeln::image::Image;
 use finales_funkeln::material::*;
 use finales_funkeln::math::float::{self, Float};
 use finales_funkeln::ray::Ray;
+use finales_funkeln::rect::*;
 use finales_funkeln::sphere::Sphere;
 use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
@@ -31,21 +32,41 @@ fn main() -> Result<(), Box<Error>> {
     };
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
-    let camera = {
-        let origin = Vec3::new(13., 2., 3.);
-        let look_at = Vec3::new(0., 0., 0.);
-        let up = Vec3::new(0., 1., 0.);
-        let time = 0.0;
-        let parameters = CameraParameters {
-            aspect_ratio: width as Float / height as Float,
-            vertical_fov: 20.,
-            focus_distance: 10.,
-            aperture: 0.1,
-            exposure_time: 1.0,
+    let (hit_list, camera) = if false {
+        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<Hit>];
+        let camera = {
+            let origin = Vec3::new(13., 2., 3.);
+            let look_at = Vec3::new(0., 0., 0.);
+            let up = Vec3::new(0., 1., 0.);
+            let time = 0.0;
+            let parameters = CameraParameters {
+                aspect_ratio: width as Float / height as Float,
+                vertical_fov: 20.,
+                focus_distance: 10.,
+                aperture: 0.1,
+                exposure_time: 1.0,
+            };
+            Camera::new(origin, look_at, up, parameters, time)
         };
-        Camera::new(origin, look_at, up, parameters, time)
+        (hit_list, camera)
+    } else {
+        let hit_list = cornell_box();
+        let camera = {
+            let origin = Vec3::new(278., 278., -800.);
+            let look_at = Vec3::new(278., 278., 0.);
+            let up = Vec3::new(0., 1., 0.);
+            let time = 0.0;
+            let parameters = CameraParameters {
+                aspect_ratio: width as Float / height as Float,
+                vertical_fov: 40.,
+                focus_distance: 10.,
+                aperture: 0.0,
+                exposure_time: 1.0,
+            };
+            Camera::new(origin, look_at, up, parameters, time)
+        };
+        (hit_list, camera)
     };
-    let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<Hit>];
 
     let progress_bar = ProgressBar::new(width as u64);
     progress_bar.set_style(
@@ -180,5 +201,52 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
         Material::diffuse_light(Texture::constant(Vec3::new(6., 6., 6.))),
     )));
 
+    list.push(Box::new(XYRect::new(
+        (3., 5.),
+        (1., 5.),
+        1.5,
+        Material::diffuse_light(Texture::constant(Vec3::new(3., 3., 3.))),
+    )));
+
     Bvh::new(list, time_start, time_end)
+}
+
+fn cornell_box() -> Vec<Box<Hit>> {
+    let mut vec: Vec<Box<Hit>> = Vec::new();
+
+    let red = Material::lambertian(Texture::constant(Vec3::new(0.65, 0.05, 0.05)));
+    let white = Material::lambertian(Texture::constant(Vec3::new(0.73, 0.73, 0.73)));
+    let green = Material::lambertian(Texture::constant(Vec3::new(0.12, 0.45, 0.15)));
+    let light = Material::diffuse_light(Texture::constant(Vec3::new(15., 15., 15.)));
+
+    const W: Float = 555.;
+
+    vec.push(Box::new(FlipNormals(YZRect::new(
+        (0., W),
+        (0., W),
+        W,
+        green,
+    ))));
+    vec.push(Box::new(YZRect::new((0., W), (0., W), 0., red)));
+    vec.push(Box::new(XZRect::new(
+        (213., 343.),
+        (227., 332.),
+        W - 1.,
+        light,
+    )));
+    vec.push(Box::new(FlipNormals(XZRect::new(
+        (0., W),
+        (0., W),
+        W,
+        white.clone(),
+    ))));
+    vec.push(Box::new(XZRect::new((0., W), (0., W), 0., white.clone())));
+    vec.push(Box::new(FlipNormals(XYRect::new(
+        (0., W),
+        (0., W),
+        W,
+        white,
+    ))));
+
+    vec
 }
