@@ -15,6 +15,7 @@ use finales_funkeln::material::*;
 use finales_funkeln::math::float::{self, Float};
 use finales_funkeln::ray::Ray;
 use finales_funkeln::rect::*;
+use finales_funkeln::rect_box::RectBox;
 use finales_funkeln::sphere::Sphere;
 use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
@@ -237,8 +238,19 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
         (0., W),
         (0., W),
         W,
-        white,
+        white.clone(),
     ))));
+
+    vec.push(Box::new(RectBox::new(
+        Vec3::new(130., 0., 65.),
+        Vec3::new(295., 165., 230.),
+        white.clone(),
+    )));
+    vec.push(Box::new(RectBox::new(
+        Vec3::new(265., 0., 295.),
+        Vec3::new(430., 330., 460.),
+        white.clone(),
+    )));
 
     vec
 }

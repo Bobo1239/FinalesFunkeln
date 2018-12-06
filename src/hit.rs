@@ -59,9 +59,9 @@ pub struct FlipNormals<T: Hit>(pub T);
 impl<T: Hit> Hit for FlipNormals<T> {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         let mut hit_record = self.0.hit(ray, t_min, t_max);
-        hit_record
-            .as_mut()
-            .map(|hit_record| hit_record.normal = -hit_record.normal);
+        if let Some(hit_record) = hit_record.as_mut() {
+            hit_record.normal = -hit_record.normal
+        }
         hit_record
     }
 
