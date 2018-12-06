@@ -5,11 +5,11 @@ use std::fmt;
 use rand::rngs::SmallRng;
 use rand::{FromEntropy, Rng};
 
-use hit::{Hit, HitRecord};
-use math::float::{self, Float};
-use math::{partial_max, partial_min};
-use ray::Ray;
-use vec3::Vec3;
+use crate::hit::{Hit, HitRecord};
+use crate::math::float::{self, Float};
+use crate::math::{partial_max, partial_min};
+use crate::ray::Ray;
+use crate::vec3::Vec3;
 
 #[derive(Debug)]
 pub enum BvhError {

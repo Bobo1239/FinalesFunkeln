@@ -1,10 +1,10 @@
 use std::fmt::Debug;
 
-use bvh::Aabb;
-use material::Material;
-use math::float::Float;
-use ray::Ray;
-use vec3::Vec3;
+use crate::bvh::Aabb;
+use crate::material::Material;
+use crate::math::float::Float;
+use crate::ray::Ray;
+use crate::vec3::Vec3;
 
 pub trait Hit: Sync + Send + Debug {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;

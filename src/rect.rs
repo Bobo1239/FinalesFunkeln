@@ -1,12 +1,12 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use bvh::Aabb;
-use hit::{Hit, HitRecord};
-use material::Material;
-use math::float::Float;
-use ray::Ray;
-use vec3::Vec3;
+use crate::bvh::Aabb;
+use crate::hit::{Hit, HitRecord};
+use crate::material::Material;
+use crate::math::float::Float;
+use crate::ray::Ray;
+use crate::vec3::Vec3;
 
 #[derive(Debug)]
 pub struct XYRect(GenericRect<XY>);

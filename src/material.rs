@@ -1,9 +1,9 @@
-use hit::HitRecord;
-use math::float::Float;
-use ray::Ray;
-use texture::Sample;
-use texture::Texture;
-use vec3::Vec3;
+use crate::hit::HitRecord;
+use crate::math::float::Float;
+use crate::ray::Ray;
+use crate::texture::Sample;
+use crate::texture::Texture;
+use crate::vec3::Vec3;
 
 use rand::Rng;
 

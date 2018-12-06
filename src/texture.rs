@@ -1,5 +1,5 @@
-use math::float::Float;
-use vec3::Vec3;
+use crate::math::float::Float;
+use crate::vec3::Vec3;
 
 pub trait Sample {
     fn sample(&self, u: Float, v: Float, p: &Vec3) -> Vec3;

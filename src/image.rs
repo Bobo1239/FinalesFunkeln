@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
 
-use math::partial_min;
-use vec3::Vec3;
+use crate::math::partial_min;
+use crate::vec3::Vec3;
 
 /// An image. The origin is at the upper-left corner.
 #[derive(Debug)]
