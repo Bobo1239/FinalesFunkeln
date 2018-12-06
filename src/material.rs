@@ -11,7 +11,7 @@ pub trait MaterialTrait {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
-        hit_record: &HitRecord,
+        hit_record: &HitRecord<'_>,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)>;
 
@@ -51,7 +51,7 @@ impl MaterialTrait for Material {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
-        hit_record: &HitRecord,
+        hit_record: &HitRecord<'_>,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)> {
         match self {
@@ -87,7 +87,7 @@ impl MaterialTrait for Lambertian {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
-        hit_record: &HitRecord,
+        hit_record: &HitRecord<'_>,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere(rng);
@@ -113,7 +113,7 @@ impl MaterialTrait for Metal {
     fn scatter<T: Rng>(
         &self,
         ray: &Ray,
-        hit_record: &HitRecord,
+        hit_record: &HitRecord<'_>,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)> {
         let reflected = reflect(&ray.direction().unit_vector(), &hit_record.normal);
@@ -145,7 +145,7 @@ impl MaterialTrait for Dielectric {
     fn scatter<T: Rng>(
         &self,
         r_in: &Ray,
-        hit_record: &HitRecord,
+        hit_record: &HitRecord<'_>,
         rng: &mut T,
     ) -> Option<(Ray, Vec3)> {
         let mut refracted: Vec3 = Vec3::zero();
@@ -196,7 +196,7 @@ impl DiffuseLight {
 }
 
 impl MaterialTrait for DiffuseLight {
-    fn scatter<T: Rng>(&self, _: &Ray, _: &HitRecord, _: &mut T) -> Option<(Ray, Vec3)> {
+    fn scatter<T: Rng>(&self, _: &Ray, _: &HitRecord<'_>, _: &mut T) -> Option<(Ray, Vec3)> {
         None
     }
 

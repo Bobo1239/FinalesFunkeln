@@ -1,5 +1,3 @@
-extern crate rand;
-
 pub mod bvh;
 pub mod camera;
 pub mod hit;

@@ -1,8 +1,3 @@
-extern crate finales_funkeln;
-extern crate indicatif;
-extern crate rand;
-extern crate rayon;
-
 use std::error::Error;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -24,7 +19,7 @@ use finales_funkeln::sphere::Sphere;
 use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let (width, height, samples_per_pixel) = if true {
         (1920, 1080, 1000)
     } else {
@@ -33,7 +28,7 @@ fn main() -> Result<(), Box<Error>> {
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
     let (hit_list, camera) = if false {
-        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<Hit>];
+        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit>];
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
             let look_at = Vec3::new(0., 0., 0.);
@@ -104,7 +99,7 @@ fn main() -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Vec3 {
+fn color<T: Rng>(ray: &Ray, world: &[Box<dyn Hit>], depth: usize, rng: &mut T) -> Vec3 {
     // Set t_min to a value slightly above 0 to prevent "shadow acne"
     match world.hit(ray, 0.001, float::MAX) {
         None => Vec3::zero(),
@@ -127,7 +122,7 @@ fn color<T: Rng>(ray: &Ray, world: &[Box<Hit>], depth: usize, rng: &mut T) -> Ve
 
 fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     let mut rng = SmallRng::from_entropy();
-    let mut list: Vec<Box<Hit>> = Vec::new();
+    let mut list: Vec<Box<dyn Hit>> = Vec::new();
 
     list.push(Box::new(Sphere::new(
         Vec3::new(0., -1000., 0.),
@@ -208,8 +203,8 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     Bvh::new(list, time_start, time_end)
 }
 
-fn cornell_box() -> Vec<Box<Hit>> {
-    let mut vec: Vec<Box<Hit>> = Vec::new();
+fn cornell_box() -> Vec<Box<dyn Hit>> {
+    let mut vec: Vec<Box<dyn Hit>> = Vec::new();
 
     let red = Material::lambertian(Texture::constant(Vec3::new(0.65, 0.05, 0.05)));
     let white = Material::lambertian(Texture::constant(Vec3::new(0.73, 0.73, 0.73)));

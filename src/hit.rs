@@ -7,7 +7,7 @@ use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 pub trait Hit: Sync + Send + Debug {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>>;
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb>;
 }
 
@@ -20,8 +20,8 @@ pub struct HitRecord<'a> {
     pub material: &'a Material,
 }
 
-impl Hit for [Box<Hit>] {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+impl Hit for [Box<dyn Hit>] {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         self.iter()
             .fold((None, t_max), |(closest_hit, closest_t), item| {
                 match item.hit(ray, t_min, closest_t) {
@@ -57,7 +57,7 @@ impl Hit for [Box<Hit>] {
 pub struct FlipNormals<T: Hit>(pub T);
 
 impl<T: Hit> Hit for FlipNormals<T> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         let mut hit_record = self.0.hit(ray, t_min, t_max);
         hit_record
             .as_mut()

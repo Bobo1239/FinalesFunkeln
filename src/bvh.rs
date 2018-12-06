@@ -19,7 +19,7 @@ pub enum BvhError {
 }
 
 impl fmt::Display for BvhError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             BvhError::MissingBoundingBox => write!(
                 f,
@@ -42,14 +42,14 @@ impl Error for BvhError {}
 
 #[derive(Debug)]
 pub struct Bvh {
-    left: Box<Hit>,
-    right: Box<Hit>,
+    left: Box<dyn Hit>,
+    right: Box<dyn Hit>,
     aabb: Aabb,
 }
 
 impl Bvh {
     pub fn new(
-        mut hit_list: Vec<Box<Hit>>,
+        mut hit_list: Vec<Box<dyn Hit>>,
         time_start: Float,
         time_end: Float,
     ) -> Result<Bvh, BvhError> {
@@ -101,14 +101,14 @@ impl Bvh {
             }
             3 => {
                 let right = hit_list.pop().unwrap();
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit>;
                 (left, right)
             }
             _ => {
                 let hit_list_len = hit_list.len(); // TODO: Not needed with NLL
                 let right_half = hit_list.split_off(hit_list_len / 2);
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<Hit>;
-                let right = Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit>;
+                let right = Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<dyn Hit>;
                 (left, right)
             }
         };
@@ -126,7 +126,7 @@ impl Bvh {
 }
 
 impl Hit for Bvh {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         if self.aabb.hit(ray, t_min, t_max) {
             match (
                 self.left.hit(ray, t_min, t_max),

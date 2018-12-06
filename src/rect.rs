@@ -18,7 +18,7 @@ impl XYRect {
 }
 
 impl Hit for XYRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         self.0.hit(ray, t_min, t_max)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
@@ -36,7 +36,7 @@ impl YZRect {
 }
 
 impl Hit for YZRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         self.0.hit(ray, t_min, t_max)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
@@ -54,7 +54,7 @@ impl XZRect {
 }
 
 impl Hit for XZRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         self.0.hit(ray, t_min, t_max)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
@@ -89,7 +89,7 @@ impl<A: Axis> GenericRect<A> {
 }
 
 impl<A: Axis> Hit for GenericRect<A> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         let t = (self.c - A::c(&ray.origin())) / A::c(&ray.direction());
         if t < t_min || t > t_max {
             return None;

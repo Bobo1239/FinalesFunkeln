@@ -56,7 +56,7 @@ impl Sphere {
 }
 
 impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
         fn calculate_hit_record<'a>(ray: &Ray, t: Float, sphere: &'a Sphere) -> HitRecord<'a> {
             let p = ray.point_at_parameter(t);
             let (u, v) = sphere_uv(&p);

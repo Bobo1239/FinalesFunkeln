@@ -234,7 +234,7 @@ impl DivAssign<Float> for Vec3 {
 }
 
 impl Display for Vec3 {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "({}, {}, {})", self.x(), self.y(), self.z())
     }
 }
