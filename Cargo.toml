@@ -6,7 +6,7 @@ authors = ["Boris-Chengbiao Zhou <bobo1239@web.de>"]
 [dependencies]
 rand = "0.6"
 rayon = "1.0.3"
-indicatif = "0.10.1"
+indicatif = "0.10.3"
 
 [features]
 f64 = []

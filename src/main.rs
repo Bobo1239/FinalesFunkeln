@@ -74,9 +74,6 @@ fn main() -> Result<(), Box<Error>> {
             .template("{spinner} {elapsed_precise}/{eta_precise} {wide_bar} {percent:3}%"),
     );
     progress_bar.enable_steady_tick(100);
-    // Tick once so the spinner starts (otherwise it doesn't move until the first state update)
-    // See: https://github.com/mitsuhiko/indicatif/issues/36
-    progress_bar.tick();
 
     (0..width).into_par_iter().for_each(|x| {
         // TODO: Use xoshiro256** once https://github.com/rust-random/rand/pull/642
