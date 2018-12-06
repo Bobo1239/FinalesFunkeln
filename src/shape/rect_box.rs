@@ -3,7 +3,7 @@ use crate::hit::{FlipNormals, Hit, HitRecord};
 use crate::material::Material;
 use crate::math::float::Float;
 use crate::ray::Ray;
-use crate::rect::{XYRect, XZRect, YZRect};
+use crate::shape::{XYRect, XZRect, YZRect};
 use crate::vec3::Vec3;
 
 #[derive(Debug)]

@@ -14,9 +14,7 @@ use finales_funkeln::image::Image;
 use finales_funkeln::material::*;
 use finales_funkeln::math::float::{self, Float};
 use finales_funkeln::ray::Ray;
-use finales_funkeln::rect::*;
-use finales_funkeln::rect_box::RectBox;
-use finales_funkeln::sphere::Sphere;
+use finales_funkeln::shape::*;
 use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
 
