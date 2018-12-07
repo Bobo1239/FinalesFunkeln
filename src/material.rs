@@ -4,6 +4,7 @@ use crate::ray::Ray;
 use crate::texture::Sample;
 use crate::texture::Texture;
 use crate::vec3::Vec3;
+use std::sync::Arc;
 
 use rand::Rng;
 
@@ -30,20 +31,20 @@ pub enum Material {
 }
 
 impl Material {
-    pub fn lambertian(texture: Texture) -> Material {
-        Material::Lambertian(Lambertian::new(texture))
+    pub fn lambertian(texture: Texture) -> Arc<Material> {
+        Arc::new(Material::Lambertian(Lambertian::new(texture)))
     }
 
-    pub fn metal(albedo: Vec3, fuzz: Float) -> Material {
-        Material::Metal(Metal::new(albedo, fuzz))
+    pub fn metal(albedo: Vec3, fuzz: Float) -> Arc<Material> {
+        Arc::new(Material::Metal(Metal::new(albedo, fuzz)))
     }
 
-    pub fn dielectric(ref_idx: Float) -> Material {
-        Material::Dielectric(Dielectric::new(ref_idx))
+    pub fn dielectric(ref_idx: Float) -> Arc<Material> {
+        Arc::new(Material::Dielectric(Dielectric::new(ref_idx)))
     }
 
-    pub fn diffuse_light(texture: Texture) -> Material {
-        Material::DiffuseLight(DiffuseLight::new(texture))
+    pub fn diffuse_light(texture: Texture) -> Arc<Material> {
+        Arc::new(Material::DiffuseLight(DiffuseLight::new(texture)))
     }
 }
 

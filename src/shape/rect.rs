@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 use crate::bvh::Aabb;
 use crate::hit::{Hit, HitRecord};
@@ -12,7 +13,7 @@ use crate::vec3::Vec3;
 pub struct XYRect(GenericRect<XY>);
 
 impl XYRect {
-    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Material) -> XYRect {
+    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Arc<Material>) -> XYRect {
         XYRect(GenericRect::new(x, y, z, material))
     }
 }
@@ -30,7 +31,7 @@ impl Hit for XYRect {
 pub struct YZRect(GenericRect<YZ>);
 
 impl YZRect {
-    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Material) -> YZRect {
+    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Arc<Material>) -> YZRect {
         YZRect(GenericRect::new(x, y, z, material))
     }
 }
@@ -48,7 +49,7 @@ impl Hit for YZRect {
 pub struct XZRect(GenericRect<XZ>);
 
 impl XZRect {
-    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Material) -> XZRect {
+    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Arc<Material>) -> XZRect {
         XZRect(GenericRect::new(x, y, z, material))
     }
 }
@@ -67,7 +68,7 @@ struct GenericRect<A: Axis> {
     pub a: (Float, Float),
     pub b: (Float, Float),
     pub c: Float,
-    material: Material,
+    material: Arc<Material>,
     axis: PhantomData<A>,
 }
 
@@ -76,7 +77,7 @@ impl<A: Axis> GenericRect<A> {
         a: (Float, Float),
         b: (Float, Float),
         c: Float,
-        material: Material,
+        material: Arc<Material>,
     ) -> GenericRect<A> {
         GenericRect {
             a,

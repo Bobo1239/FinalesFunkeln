@@ -5,17 +5,18 @@ use crate::math::float::consts::{FRAC_PI_2, PI};
 use crate::math::float::Float;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
     center: Vec3,
     radius: Float,
-    material: Material,
+    material: Arc<Material>,
     motion_vector: Option<Vec3>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: Float, material: Material) -> Sphere {
+    pub fn new(center: Vec3, radius: Float, material: Arc<Material>) -> Sphere {
         Sphere {
             center,
             radius,
@@ -27,7 +28,7 @@ impl Sphere {
     pub fn new_moving(
         center: Vec3,
         radius: Float,
-        material: Material,
+        material: Arc<Material>,
         motion_vector: Vec3,
     ) -> Sphere {
         Sphere {

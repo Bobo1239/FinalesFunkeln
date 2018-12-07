@@ -223,20 +223,33 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
         light,
     )));
     vec.push(Box::new(
-        XZRect::new((0., W), (0., W), W, white.clone()).flip_normals(),
+        XZRect::new((0., W), (0., W), W, Arc::clone(&white)).flip_normals(),
     ));
-    vec.push(Box::new(XZRect::new((0., W), (0., W), 0., white.clone())));
+    vec.push(Box::new(XZRect::new(
+        (0., W),
+        (0., W),
+        0.,
+        Arc::clone(&white),
+    )));
     vec.push(Box::new(
-        XYRect::new((0., W), (0., W), W, white.clone()).flip_normals(),
+        XYRect::new((0., W), (0., W), W, Arc::clone(&white)).flip_normals(),
     ));
 
     vec.push(Box::new(
-        RectBox::new(Vec3::zero(), Vec3::new(165., 165., 165.), white.clone())
-            .translate(Vec3::new(130., 0., 65.)),
+        RectBox::new(
+            Vec3::zero(),
+            Vec3::new(165., 165., 165.),
+            Arc::clone(&white),
+        )
+        .translate(Vec3::new(130., 0., 65.)),
     ));
     vec.push(Box::new(
-        RectBox::new(Vec3::zero(), Vec3::new(165., 330., 165.), white.clone())
-            .translate(Vec3::new(265., 0., 295.)),
+        RectBox::new(
+            Vec3::zero(),
+            Vec3::new(165., 330., 165.),
+            Arc::clone(&white),
+        )
+        .translate(Vec3::new(265., 0., 295.)),
     ));
 
     vec
