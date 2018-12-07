@@ -241,6 +241,7 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
             Vec3::new(165., 165., 165.),
             Arc::clone(&white),
         )
+        .rotate_y(-18.)
         .translate(Vec3::new(130., 0., 65.)),
     ));
     vec.push(Box::new(
@@ -249,6 +250,7 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
             Vec3::new(165., 330., 165.),
             Arc::clone(&white),
         )
+        .rotate_y(15.)
         .translate(Vec3::new(265., 0., 295.)),
     ));
 
