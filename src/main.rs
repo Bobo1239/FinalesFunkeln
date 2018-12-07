@@ -9,7 +9,7 @@ use rayon::prelude::*;
 
 use finales_funkeln::bvh::{Bvh, BvhError};
 use finales_funkeln::camera::{Camera, CameraParameters};
-use finales_funkeln::hit::{FlipNormals, Hit};
+use finales_funkeln::hit::Hit;
 use finales_funkeln::image::Image;
 use finales_funkeln::material::*;
 use finales_funkeln::math::float::{self, Float};
@@ -212,12 +212,9 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
 
     const W: Float = 555.;
 
-    vec.push(Box::new(FlipNormals(YZRect::new(
-        (0., W),
-        (0., W),
-        W,
-        green,
-    ))));
+    vec.push(Box::new(
+        YZRect::new((0., W), (0., W), W, green).flip_normals(),
+    ));
     vec.push(Box::new(YZRect::new((0., W), (0., W), 0., red)));
     vec.push(Box::new(XZRect::new(
         (213., 343.),
@@ -225,30 +222,22 @@ fn cornell_box() -> Vec<Box<dyn Hit>> {
         W - 1.,
         light,
     )));
-    vec.push(Box::new(FlipNormals(XZRect::new(
-        (0., W),
-        (0., W),
-        W,
-        white.clone(),
-    ))));
+    vec.push(Box::new(
+        XZRect::new((0., W), (0., W), W, white.clone()).flip_normals(),
+    ));
     vec.push(Box::new(XZRect::new((0., W), (0., W), 0., white.clone())));
-    vec.push(Box::new(FlipNormals(XYRect::new(
-        (0., W),
-        (0., W),
-        W,
-        white.clone(),
-    ))));
+    vec.push(Box::new(
+        XYRect::new((0., W), (0., W), W, white.clone()).flip_normals(),
+    ));
 
-    vec.push(Box::new(RectBox::new(
-        Vec3::new(130., 0., 65.),
-        Vec3::new(295., 165., 230.),
-        white.clone(),
-    )));
-    vec.push(Box::new(RectBox::new(
-        Vec3::new(265., 0., 295.),
-        Vec3::new(430., 330., 460.),
-        white.clone(),
-    )));
+    vec.push(Box::new(
+        RectBox::new(Vec3::zero(), Vec3::new(165., 165., 165.), white.clone())
+            .translate(Vec3::new(130., 0., 65.)),
+    ));
+    vec.push(Box::new(
+        RectBox::new(Vec3::zero(), Vec3::new(165., 330., 165.), white.clone())
+            .translate(Vec3::new(265., 0., 295.)),
+    ));
 
     vec
 }

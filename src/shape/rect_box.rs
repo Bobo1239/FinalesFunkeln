@@ -1,9 +1,9 @@
 use crate::bvh::Aabb;
-use crate::hit::{FlipNormals, Hit, HitRecord};
+use crate::hit::{Hit, HitRecord};
 use crate::material::Material;
 use crate::math::float::Float;
 use crate::ray::Ray;
-use crate::shape::{XYRect, XZRect, YZRect};
+use crate::shape::{FlipNormals, XYRect, XZRect, YZRect};
 use crate::vec3::Vec3;
 
 #[derive(Debug)]
