@@ -4,7 +4,8 @@ use std::sync::{Arc, Mutex};
 
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::rngs::SmallRng;
-use rand::{FromEntropy, Rng};
+use rand::FromEntropy;
+use rand::Rng as RandRng;
 use rayon::prelude::*;
 
 use finales_funkeln::bvh::{Bvh, BvhError};
@@ -17,6 +18,7 @@ use finales_funkeln::ray::Ray;
 use finales_funkeln::shape::*;
 use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
+use finales_funkeln::Rng;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let (width, height, samples_per_pixel) = if true {
@@ -27,7 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
     let (hit_list, camera) = if false {
-        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit>];
+        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit<SmallRng>>];
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
             let look_at = Vec3::new(0., 0., 0.);
@@ -98,9 +100,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn color<T: Rng>(ray: &Ray, world: &[Box<dyn Hit>], depth: usize, rng: &mut T) -> Vec3 {
+fn color<R: Rng>(ray: &Ray, world: &[Box<dyn Hit<R>>], depth: usize, rng: &mut R) -> Vec3 {
     // Set t_min to a value slightly above 0 to prevent "shadow acne"
-    match world.hit(ray, 0.001, float::MAX) {
+    match world.hit(ray, 0.001, float::MAX, rng) {
         None => Vec3::zero(),
         Some(hit_record) => {
             let emitted = hit_record
@@ -119,9 +121,9 @@ fn color<T: Rng>(ray: &Ray, world: &[Box<dyn Hit>], depth: usize, rng: &mut T) -
     }
 }
 
-fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
+fn random_scene<R: Rng>(time_start: Float, time_end: Float) -> Result<Bvh<R>, BvhError> {
     let mut rng = SmallRng::from_entropy();
-    let mut list: Vec<Box<dyn Hit>> = Vec::new();
+    let mut list: Vec<Box<dyn Hit<R>>> = Vec::new();
 
     list.push(Box::new(Sphere::new(
         Vec3::new(0., -1000., 0.),
@@ -202,8 +204,8 @@ fn random_scene(time_start: Float, time_end: Float) -> Result<Bvh, BvhError> {
     Bvh::new(list, time_start, time_end)
 }
 
-fn cornell_box() -> Vec<Box<dyn Hit>> {
-    let mut vec: Vec<Box<dyn Hit>> = Vec::new();
+fn cornell_box<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
+    let mut vec: Vec<Box<dyn Hit<R>>> = Vec::new();
 
     let red = Material::lambertian(Texture::constant(Vec3::new(0.65, 0.05, 0.05)));
     let white = Material::lambertian(Texture::constant(Vec3::new(0.73, 0.73, 0.73)));

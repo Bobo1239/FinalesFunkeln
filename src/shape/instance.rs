@@ -1,39 +1,49 @@
+use std::marker::PhantomData;
+
 use crate::bvh::Aabb;
 use crate::hit::Hit;
 use crate::hit::HitRecord;
 use crate::math::float::{self, Float};
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::Rng;
 
-pub trait Transform: Hit + Sized {
-    fn flip_normals(self) -> FlipNormals<Self>;
-    fn translate(self, offset: Vec3) -> Translate<Self>;
-    fn rotate_y(self, angle: Float) -> RotateY<Self>;
+pub trait Transform<R: Rng>: Hit<R> + Sized {
+    fn flip_normals(self) -> FlipNormals<R, Self>;
+    fn translate(self, offset: Vec3) -> Translate<R, Self>;
+    fn rotate_y(self, angle: Float) -> RotateY<R, Self>;
 }
 
-impl<T: Hit> Transform for T {
-    fn flip_normals(self) -> FlipNormals<T> {
-        FlipNormals(self)
-    }
-
-    fn translate(self, offset: Vec3) -> Translate<T> {
-        Translate {
+impl<R: Rng, T: Hit<R>> Transform<R> for T {
+    fn flip_normals(self) -> FlipNormals<R, T> {
+        FlipNormals {
             inner: self,
-            offset,
+            phantom_data: PhantomData,
         }
     }
 
-    fn rotate_y(self, angle: Float) -> RotateY<T> {
+    fn translate(self, offset: Vec3) -> Translate<R, T> {
+        Translate {
+            inner: self,
+            offset,
+            phantom_data: PhantomData,
+        }
+    }
+
+    fn rotate_y(self, angle: Float) -> RotateY<R, T> {
         RotateY::new(self, angle)
     }
 }
 
 #[derive(Debug)]
-pub struct FlipNormals<T: Hit>(pub T);
+pub struct FlipNormals<R: Rng, T: Hit<R>> {
+    inner: T,
+    phantom_data: PhantomData<R>,
+}
 
-impl<T: Hit> Hit for FlipNormals<T> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
-        let mut hit_record = self.0.hit(ray, t_min, t_max);
+impl<R: Rng, T: Hit<R>> Hit<R> for FlipNormals<R, T> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
+        let mut hit_record = self.inner.hit(ray, t_min, t_max, rng);
         if let Some(hit_record) = hit_record.as_mut() {
             hit_record.normal = -hit_record.normal
         }
@@ -41,20 +51,21 @@ impl<T: Hit> Hit for FlipNormals<T> {
     }
 
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
-        self.0.bounding_box(time_start, time_end)
+        self.inner.bounding_box(time_start, time_end)
     }
 }
 
 #[derive(Debug)]
-pub struct Translate<T: Hit> {
+pub struct Translate<R: Rng, T: Hit<R>> {
     inner: T,
     offset: Vec3,
+    phantom_data: PhantomData<R>,
 }
 
-impl<T: Hit> Hit for Translate<T> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
+impl<R: Rng, T: Hit<R>> Hit<R> for Translate<R, T> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
         let offset_ray = Ray::new(ray.origin() - self.offset, ray.direction(), ray.time());
-        let mut hit_record = self.inner.hit(&offset_ray, t_min, t_max);
+        let mut hit_record = self.inner.hit(&offset_ray, t_min, t_max, rng);
         if let Some(hit_record) = hit_record.as_mut() {
             hit_record.p += self.offset;
         }
@@ -69,15 +80,16 @@ impl<T: Hit> Hit for Translate<T> {
 }
 
 #[derive(Debug)]
-pub struct RotateY<T: Hit> {
+pub struct RotateY<R: Rng, T: Hit<R>> {
     inner: T,
     bounding_box: Option<Aabb>,
     sin_theta: Float,
     cos_theta: Float,
+    phantom_data: PhantomData<R>,
 }
 
-impl<T: Hit> RotateY<T> {
-    pub fn new(inner: T, angle: Float) -> RotateY<T> {
+impl<R: Rng, T: Hit<R>> RotateY<R, T> {
+    pub fn new(inner: T, angle: Float) -> RotateY<R, T> {
         let radians = angle.to_radians();
         let sin_theta = radians.sin();
         let cos_theta = radians.cos();
@@ -111,12 +123,13 @@ impl<T: Hit> RotateY<T> {
                 Aabb::new(min, max)
             }),
             inner,
+            phantom_data: PhantomData,
         }
     }
 }
 
-impl<T: Hit> Hit for RotateY<T> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
+impl<R: Rng, T: Hit<R>> Hit<R> for RotateY<R, T> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
         let mut origin = ray.origin();
         let mut direction = ray.direction();
 
@@ -128,7 +141,7 @@ impl<T: Hit> Hit for RotateY<T> {
 
         let rotated = Ray::new(origin, direction, ray.time());
         self.inner
-            .hit(&rotated, t_min, t_max)
+            .hit(&rotated, t_min, t_max, rng)
             .map(|mut hit_record| {
                 let mut p = hit_record.p;
                 let mut normal = hit_record.normal;

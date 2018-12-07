@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::bvh::Aabb;
 use crate::hit::{Hit, HitRecord};
 use crate::material::Material;
@@ -5,7 +7,7 @@ use crate::math::float::consts::{FRAC_PI_2, PI};
 use crate::math::float::Float;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
-use std::sync::Arc;
+use crate::Rng;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
@@ -56,8 +58,8 @@ impl Sphere {
     }
 }
 
-impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
+impl<R: Rng> Hit<R> for Sphere {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, _: &mut R) -> Option<HitRecord<'_>> {
         fn calculate_hit_record<'a>(ray: &Ray, t: Float, sphere: &'a Sphere) -> HitRecord<'a> {
             let p = ray.point_at_parameter(t);
             let (u, v) = sphere_uv(&p);

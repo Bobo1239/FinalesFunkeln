@@ -8,6 +8,7 @@ use crate::material::Material;
 use crate::math::float::Float;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::Rng;
 
 #[derive(Debug)]
 pub struct XYRect(GenericRect<XY>);
@@ -18,9 +19,12 @@ impl XYRect {
     }
 }
 
-impl Hit for XYRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
-        self.0.hit(ray, t_min, t_max)
+impl<R: Rng> Hit<R> for XYRect
+where
+    GenericRect<XY>: Hit<R>,
+{
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
+        self.0.hit(ray, t_min, t_max, rng)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
         self.0.bounding_box(time_start, time_end)
@@ -36,9 +40,12 @@ impl YZRect {
     }
 }
 
-impl Hit for YZRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
-        self.0.hit(ray, t_min, t_max)
+impl<R: Rng> Hit<R> for YZRect
+where
+    GenericRect<YZ>: Hit<R>,
+{
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
+        self.0.hit(ray, t_min, t_max, rng)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
         self.0.bounding_box(time_start, time_end)
@@ -54,9 +61,12 @@ impl XZRect {
     }
 }
 
-impl Hit for XZRect {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
-        self.0.hit(ray, t_min, t_max)
+impl<R: Rng> Hit<R> for XZRect
+where
+    GenericRect<XZ>: Hit<R>,
+{
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
+        self.0.hit(ray, t_min, t_max, rng)
     }
     fn bounding_box(&self, time_start: Float, time_end: Float) -> Option<Aabb> {
         self.0.bounding_box(time_start, time_end)
@@ -64,7 +74,7 @@ impl Hit for XZRect {
 }
 
 #[derive(Debug)]
-struct GenericRect<A: Axis> {
+pub struct GenericRect<A: Axis> {
     pub a: (Float, Float),
     pub b: (Float, Float),
     pub c: Float,
@@ -89,8 +99,8 @@ impl<A: Axis> GenericRect<A> {
     }
 }
 
-impl<A: Axis> Hit for GenericRect<A> {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
+impl<R: Rng, A: Axis> Hit<R> for GenericRect<A> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, _: &mut R) -> Option<HitRecord<'_>> {
         let t = (self.c - A::c(&ray.origin())) / A::c(&ray.direction());
         if t < t_min || t > t_max {
             return None;
@@ -116,7 +126,7 @@ impl<A: Axis> Hit for GenericRect<A> {
     }
 }
 
-trait Axis: Debug + Sync + Send {
+pub trait Axis: Debug + Sync + Send {
     fn a(vec3: &Vec3) -> Float;
     fn b(vec3: &Vec3) -> Float;
     fn c(vec3: &Vec3) -> Float;
@@ -125,7 +135,7 @@ trait Axis: Debug + Sync + Send {
 }
 
 #[derive(Debug)]
-struct XY;
+pub struct XY;
 
 impl Axis for XY {
     fn a(vec3: &Vec3) -> Float {
@@ -149,7 +159,7 @@ impl Axis for XY {
 }
 
 #[derive(Debug)]
-struct YZ;
+pub struct YZ;
 
 impl Axis for YZ {
     fn a(vec3: &Vec3) -> Float {
@@ -173,7 +183,7 @@ impl Axis for YZ {
 }
 
 #[derive(Debug)]
-struct XZ;
+pub struct XZ;
 
 impl Axis for XZ {
     fn a(vec3: &Vec3) -> Float {

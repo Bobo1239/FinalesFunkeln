@@ -1,19 +1,19 @@
+use std::sync::Arc;
+
 use crate::hit::HitRecord;
 use crate::math::float::Float;
 use crate::ray::Ray;
 use crate::texture::Sample;
 use crate::texture::Texture;
 use crate::vec3::Vec3;
-use std::sync::Arc;
-
-use rand::Rng;
+use crate::Rng;
 
 pub trait MaterialTrait {
-    fn scatter<T: Rng>(
+    fn scatter<R: Rng>(
         &self,
         ray: &Ray,
         hit_record: &HitRecord<'_>,
-        rng: &mut T,
+        rng: &mut R,
     ) -> Option<(Ray, Vec3)>;
 
     #[allow(unused_variables)]
@@ -49,11 +49,11 @@ impl Material {
 }
 
 impl MaterialTrait for Material {
-    fn scatter<T: Rng>(
+    fn scatter<R: Rng>(
         &self,
         ray: &Ray,
         hit_record: &HitRecord<'_>,
-        rng: &mut T,
+        rng: &mut R,
     ) -> Option<(Ray, Vec3)> {
         match self {
             Material::Lambertian(lambertian) => lambertian.scatter(ray, hit_record, rng),
@@ -85,11 +85,11 @@ impl Lambertian {
 }
 
 impl MaterialTrait for Lambertian {
-    fn scatter<T: Rng>(
+    fn scatter<R: Rng>(
         &self,
         ray: &Ray,
         hit_record: &HitRecord<'_>,
-        rng: &mut T,
+        rng: &mut R,
     ) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere(rng);
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p, ray.time());
@@ -111,11 +111,11 @@ impl Metal {
 }
 
 impl MaterialTrait for Metal {
-    fn scatter<T: Rng>(
+    fn scatter<R: Rng>(
         &self,
         ray: &Ray,
         hit_record: &HitRecord<'_>,
-        rng: &mut T,
+        rng: &mut R,
     ) -> Option<(Ray, Vec3)> {
         let reflected = reflect(&ray.direction().unit_vector(), &hit_record.normal);
         let scattered = Ray::new(
@@ -143,11 +143,11 @@ impl Dielectric {
 }
 
 impl MaterialTrait for Dielectric {
-    fn scatter<T: Rng>(
+    fn scatter<R: Rng>(
         &self,
         r_in: &Ray,
         hit_record: &HitRecord<'_>,
-        rng: &mut T,
+        rng: &mut R,
     ) -> Option<(Ray, Vec3)> {
         let mut refracted: Vec3 = Vec3::zero();
         let reflect_prob: Float;
@@ -197,12 +197,38 @@ impl DiffuseLight {
 }
 
 impl MaterialTrait for DiffuseLight {
-    fn scatter<T: Rng>(&self, _: &Ray, _: &HitRecord<'_>, _: &mut T) -> Option<(Ray, Vec3)> {
+    fn scatter<R: Rng>(&self, _: &Ray, _: &HitRecord<'_>, _: &mut R) -> Option<(Ray, Vec3)> {
         None
     }
 
     fn emit(&self, u: Float, v: Float, p: &Vec3) -> Vec3 {
         self.texture.sample(u, v, p)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Isotropic {
+    albedo: Texture,
+}
+
+impl Isotropic {
+    pub fn new(albedo: Texture) -> Isotropic {
+        Isotropic { albedo }
+    }
+}
+
+impl MaterialTrait for Isotropic {
+    fn scatter<R: Rng>(
+        &self,
+        ray: &Ray,
+        hit_record: &HitRecord,
+        rng: &mut R,
+    ) -> Option<(Ray, Vec3)> {
+        Some((
+            Ray::new(hit_record.p, random_in_unit_sphere(rng), ray.time()),
+            self.albedo
+                .sample(hit_record.u, hit_record.v, &hit_record.p),
+        ))
     }
 }
 
@@ -223,7 +249,7 @@ fn refract(v: &Vec3, n: &Vec3, ni_over_nt: Float) -> Option<Vec3> {
     }
 }
 
-fn random_in_unit_sphere<T: Rng>(rng: &mut T) -> Vec3 {
+fn random_in_unit_sphere<R: Rng>(rng: &mut R) -> Vec3 {
     loop {
         let p = Vec3::new(rng.gen(), rng.gen(), rng.gen()) * 2.0 - Vec3::new(1., 1., 1.);
         if p.length_squared() < 1.0 {

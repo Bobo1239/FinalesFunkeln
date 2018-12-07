@@ -1,10 +1,9 @@
 use crate::math::float::consts::PI;
 use crate::math::float::Float;
 
-use rand::Rng;
-
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::Rng;
 
 #[derive(Debug)]
 pub struct Camera {

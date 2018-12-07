@@ -3,13 +3,15 @@ use std::error::Error;
 use std::fmt;
 
 use rand::rngs::SmallRng;
-use rand::{FromEntropy, Rng};
+use rand::FromEntropy;
+use rand::Rng as RandRng;
 
 use crate::hit::{Hit, HitRecord};
 use crate::math::float::{self, Float};
 use crate::math::{partial_max, partial_min};
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use crate::Rng;
 
 #[derive(Debug)]
 pub enum BvhError {
@@ -41,18 +43,18 @@ impl fmt::Display for BvhError {
 impl Error for BvhError {}
 
 #[derive(Debug)]
-pub struct Bvh {
-    left: Box<dyn Hit>,
-    right: Box<dyn Hit>,
+pub struct Bvh<R: Rng> {
+    left: Box<dyn Hit<R>>,
+    right: Box<dyn Hit<R>>,
     aabb: Aabb,
 }
 
-impl Bvh {
+impl<R: Rng> Bvh<R> {
     pub fn new(
-        mut hit_list: Vec<Box<dyn Hit>>,
+        mut hit_list: Vec<Box<dyn Hit<R>>>,
         time_start: Float,
         time_end: Float,
-    ) -> Result<Bvh, BvhError> {
+    ) -> Result<Bvh<R>, BvhError> {
         let mut rng = SmallRng::from_entropy();
 
         let axis = rng.gen_range(0, 3);
@@ -101,14 +103,15 @@ impl Bvh {
             }
             3 => {
                 let right = hit_list.pop().unwrap();
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit<R>>;
                 (left, right)
             }
             _ => {
                 let hit_list_len = hit_list.len(); // TODO: Not needed with NLL
                 let right_half = hit_list.split_off(hit_list_len / 2);
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit>;
-                let right = Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<dyn Hit>;
+                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit<R>>;
+                let right =
+                    Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<dyn Hit<R>>;
                 (left, right)
             }
         };
@@ -125,12 +128,12 @@ impl Bvh {
     }
 }
 
-impl Hit for Bvh {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord<'_>> {
+impl<R: Rng> Hit<R> for Bvh<R> {
+    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, rng: &mut R) -> Option<HitRecord<'_>> {
         if self.aabb.hit(ray, t_min, t_max) {
             match (
-                self.left.hit(ray, t_min, t_max),
-                self.right.hit(ray, t_min, t_max),
+                self.left.hit(ray, t_min, t_max, rng),
+                self.right.hit(ray, t_min, t_max, rng),
             ) {
                 (Some(l), Some(r)) => {
                     if l.t < r.t {
