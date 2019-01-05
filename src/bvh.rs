@@ -107,7 +107,7 @@ impl<R: Rng> Bvh<R> {
                 (left, right)
             }
             _ => {
-                let hit_list_len = hit_list.len(); // TODO: Not needed with NLL
+                let hit_list_len = hit_list.len();
                 let right_half = hit_list.split_off(hit_list_len / 2);
                 let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit<R>>;
                 let right =

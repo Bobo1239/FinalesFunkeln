@@ -3,9 +3,9 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::rngs::SmallRng;
 use rand::FromEntropy;
 use rand::Rng as RandRng;
+use rand_xoshiro::Xoshiro256StarStar;
 use rayon::prelude::*;
 
 use finales_funkeln::bvh::{Bvh, BvhError};
@@ -20,6 +20,8 @@ use finales_funkeln::texture::Texture;
 use finales_funkeln::vec3::Vec3;
 use finales_funkeln::Rng;
 
+type Prng = Xoshiro256StarStar;
+
 fn main() -> Result<(), Box<dyn Error>> {
     let (width, height, samples_per_pixel) = if true {
         (1920, 1080, 1000)
@@ -29,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
     let (hit_list, camera) = if false {
-        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit<SmallRng>>];
+        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit<Prng>>];
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
             let look_at = Vec3::new(0., 0., 0.);
@@ -72,9 +74,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     progress_bar.enable_steady_tick(100);
 
     (0..width).into_par_iter().for_each(|x| {
-        // TODO: Use xoshiro256** once https://github.com/rust-random/rand/pull/642
-        //       is in rand release.
-        let mut rng = SmallRng::from_entropy();
+        let mut rng = Prng::from_entropy();
         let mut column = Vec::with_capacity(height);
         for y in 0..height {
             let mut color_acc = Vec3::new(0., 0., 0.);
@@ -122,7 +122,7 @@ fn color<R: Rng>(ray: &Ray, world: &[Box<dyn Hit<R>>], depth: usize, rng: &mut R
 }
 
 fn random_scene<R: Rng>(time_start: Float, time_end: Float) -> Result<Bvh<R>, BvhError> {
-    let mut rng = SmallRng::from_entropy();
+    let mut rng = Prng::from_entropy();
     let mut list: Vec<Box<dyn Hit<R>>> = Vec::new();
 
     list.push(Box::new(Sphere::new(
