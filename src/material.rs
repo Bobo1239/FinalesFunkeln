@@ -28,6 +28,7 @@ pub enum Material {
     Metal(Metal),
     Dielectric(Dielectric),
     DiffuseLight(DiffuseLight),
+    Isotropic(Isotropic),
 }
 
 impl Material {
@@ -46,6 +47,12 @@ impl Material {
     pub fn diffuse_light(texture: Texture) -> Arc<Material> {
         Arc::new(Material::DiffuseLight(DiffuseLight::new(texture)))
     }
+
+    // Isotropic is only used by ConstantMedium which doesn't share it's phase function (material)
+    // with others so we don't need the `Arc<T>`.
+    pub fn isotropic(albedo: Texture) -> Material {
+        Material::Isotropic(Isotropic::new(albedo))
+    }
 }
 
 impl MaterialTrait for Material {
@@ -60,6 +67,7 @@ impl MaterialTrait for Material {
             Material::Metal(metal) => metal.scatter(ray, hit_record, rng),
             Material::Dielectric(dielectric) => dielectric.scatter(ray, hit_record, rng),
             Material::DiffuseLight(diffuse_light) => diffuse_light.scatter(ray, hit_record, rng),
+            Material::Isotropic(isotropic) => isotropic.scatter(ray, hit_record, rng),
         }
     }
 
@@ -69,6 +77,7 @@ impl MaterialTrait for Material {
             Material::Metal(metal) => metal.emit(u, v, p),
             Material::Dielectric(dielectric) => dielectric.emit(u, v, p),
             Material::DiffuseLight(diffuse_light) => diffuse_light.emit(u, v, p),
+            Material::Isotropic(isotropic) => isotropic.emit(u, v, p),
         }
     }
 }

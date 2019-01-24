@@ -2,10 +2,6 @@ use std::cmp::Ordering;
 use std::error::Error;
 use std::fmt;
 
-use rand::rngs::SmallRng;
-use rand::FromEntropy;
-use rand::Rng as RandRng;
-
 use crate::hit::{Hit, HitRecord};
 use crate::math::float::{self, Float};
 use crate::math::{partial_max, partial_min};
@@ -54,9 +50,8 @@ impl<R: Rng> Bvh<R> {
         mut hit_list: Vec<Box<dyn Hit<R>>>,
         time_start: Float,
         time_end: Float,
+        rng: &mut R,
     ) -> Result<Bvh<R>, BvhError> {
-        let mut rng = SmallRng::from_entropy();
-
         let axis = rng.gen_range(0, 3);
         let mut error = None;
         hit_list.sort_unstable_by(|a, b| {
@@ -103,15 +98,17 @@ impl<R: Rng> Bvh<R> {
             }
             3 => {
                 let right = hit_list.pop().unwrap();
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit<R>>;
+                let left =
+                    Box::new(Bvh::new(hit_list, time_start, time_end, rng)?) as Box<dyn Hit<R>>;
                 (left, right)
             }
             _ => {
                 let hit_list_len = hit_list.len();
                 let right_half = hit_list.split_off(hit_list_len / 2);
-                let left = Box::new(Bvh::new(hit_list, time_start, time_end)?) as Box<dyn Hit<R>>;
+                let left =
+                    Box::new(Bvh::new(hit_list, time_start, time_end, rng)?) as Box<dyn Hit<R>>;
                 let right =
-                    Box::new(Bvh::new(right_half, time_start, time_end)?) as Box<dyn Hit<R>>;
+                    Box::new(Bvh::new(right_half, time_start, time_end, rng)?) as Box<dyn Hit<R>>;
                 (left, right)
             }
         };

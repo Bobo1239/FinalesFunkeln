@@ -30,8 +30,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     let image = Arc::new(Mutex::new(Image::new(width, height)));
 
+    let mut rng = Prng::from_entropy();
     let (hit_list, camera) = if false {
-        let hit_list = vec![Box::new(random_scene(0.0, 1.0)?) as Box<dyn Hit<Prng>>];
+        let hit_list = vec![Box::new(random_scene(0.0, 1.0, &mut rng)?) as Box<dyn Hit<Prng>>];
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
             let look_at = Vec3::new(0., 0., 0.);
@@ -48,7 +49,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         };
         (hit_list, camera)
     } else {
-        let hit_list = cornell_box();
+        let hit_list = if false {
+            cornell_box()
+        } else {
+            cornell_box_smoke()
+        };
         let camera = {
             let origin = Vec3::new(278., 278., -800.);
             let look_at = Vec3::new(278., 278., 0.);
@@ -121,8 +126,11 @@ fn color<R: Rng>(ray: &Ray, world: &[Box<dyn Hit<R>>], depth: usize, rng: &mut R
     }
 }
 
-fn random_scene<R: Rng>(time_start: Float, time_end: Float) -> Result<Bvh<R>, BvhError> {
-    let mut rng = Prng::from_entropy();
+fn random_scene<R: Rng>(
+    time_start: Float,
+    time_end: Float,
+    rng: &mut R,
+) -> Result<Bvh<R>, BvhError> {
     let mut list: Vec<Box<dyn Hit<R>>> = Vec::new();
 
     list.push(Box::new(Sphere::new(
@@ -201,7 +209,7 @@ fn random_scene<R: Rng>(time_start: Float, time_end: Float) -> Result<Bvh<R>, Bv
         Material::diffuse_light(Texture::constant(Vec3::new(3., 3., 3.))),
     )));
 
-    Bvh::new(list, time_start, time_end)
+    Bvh::new(list, time_start, time_end, rng)
 }
 
 fn cornell_box<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
@@ -255,6 +263,69 @@ fn cornell_box<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
         .rotate_y(15.)
         .translate(Vec3::new(265., 0., 295.)),
     ));
+
+    vec
+}
+
+fn cornell_box_smoke<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
+    let mut vec: Vec<Box<dyn Hit<R>>> = Vec::new();
+
+    let red = Material::lambertian(Texture::constant(Vec3::new(0.65, 0.05, 0.05)));
+    let white = Material::lambertian(Texture::constant(Vec3::new(0.73, 0.73, 0.73)));
+    let green = Material::lambertian(Texture::constant(Vec3::new(0.12, 0.45, 0.15)));
+    let light = Material::diffuse_light(Texture::constant(Vec3::new(7., 7., 7.)));
+
+    const W: Float = 555.;
+
+    vec.push(Box::new(
+        YZRect::new((0., W), (0., W), W, green).flip_normals(),
+    ));
+    vec.push(Box::new(YZRect::new((0., W), (0., W), 0., red)));
+    vec.push(Box::new(XZRect::new(
+        (213., 343.),
+        (227., 332.),
+        W - 1.,
+        light,
+    )));
+    vec.push(Box::new(
+        XZRect::new((0., W), (0., W), W, Arc::clone(&white)).flip_normals(),
+    ));
+    vec.push(Box::new(XZRect::new(
+        (0., W),
+        (0., W),
+        0.,
+        Arc::clone(&white),
+    )));
+    vec.push(Box::new(
+        XYRect::new((0., W), (0., W), W, Arc::clone(&white)).flip_normals(),
+    ));
+
+    let box1 = RectBox::new(
+        Vec3::zero(),
+        Vec3::new(165., 165., 165.),
+        Arc::clone(&white),
+    )
+    .rotate_y(-18.)
+    .translate(Vec3::new(130., 0., 65.));
+
+    let box2 = RectBox::new(
+        Vec3::zero(),
+        Vec3::new(165., 330., 165.),
+        Arc::clone(&white),
+    )
+    .rotate_y(15.)
+    .translate(Vec3::new(265., 0., 295.));
+
+    vec.push(Box::new(ConstantMedium::new(
+        box1,
+        0.01,
+        Texture::constant(Vec3::new(1.0, 1.0, 1.0)),
+    )));
+    vec.push(Box::new(ConstantMedium::new(
+        box2,
+        0.01,
+        Texture::constant(Vec3::new(0.0, 0.0, 0.0)),
+    )));
 
     vec
 }
