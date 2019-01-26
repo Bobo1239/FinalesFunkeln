@@ -35,8 +35,8 @@ where
 pub struct YZRect(GenericRect<YZ>);
 
 impl YZRect {
-    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Arc<Material>) -> YZRect {
-        YZRect(GenericRect::new(x, y, z, material))
+    pub fn new(y: (Float, Float), z: (Float, Float), x: Float, material: Arc<Material>) -> YZRect {
+        YZRect(GenericRect::new(y, z, x, material))
     }
 }
 
@@ -56,8 +56,8 @@ where
 pub struct XZRect(GenericRect<XZ>);
 
 impl XZRect {
-    pub fn new(x: (Float, Float), y: (Float, Float), z: Float, material: Arc<Material>) -> XZRect {
-        XZRect(GenericRect::new(x, y, z, material))
+    pub fn new(x: (Float, Float), z: (Float, Float), y: Float, material: Arc<Material>) -> XZRect {
+        XZRect(GenericRect::new(x, z, y, material))
     }
 }
 

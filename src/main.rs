@@ -22,6 +22,9 @@ use finales_funkeln::Rng;
 
 type Prng = Xoshiro256StarStar;
 
+// TODO: Revamp material/texture resource managment (Scene) so we don't need `Arc`s and can share
+//       `Texture`s.
+
 fn main() -> Result<(), Box<dyn Error>> {
     let (width, height, samples_per_pixel) = if true {
         (1920, 1080, 1000)
@@ -32,7 +35,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut rng = Prng::from_entropy();
     let (hit_list, camera) = if false {
-        let hit_list = vec![Box::new(random_scene(0.0, 1.0, &mut rng)?) as Box<dyn Hit<Prng>>];
+        let hit_list = if true {
+            vec![Box::new(random_scene(0.0, 1.0, &mut rng)?) as Box<dyn Hit<Prng>>]
+        } else {
+            two_perlin_spheres()
+        };
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
             let look_at = Vec3::new(0., 0., 0.);
@@ -327,5 +334,27 @@ fn cornell_box_smoke<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
         Texture::constant(Vec3::new(0.0, 0.0, 0.0)),
     )));
 
+    vec
+}
+
+fn two_perlin_spheres<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
+    let mut vec: Vec<Box<dyn Hit<R>>> = Vec::new();
+    let light = Material::diffuse_light(Texture::constant(Vec3::new(1., 1., 1.)));
+    vec.push(Box::new(XZRect::new(
+        (-100., 100.),
+        (-100., 100.),
+        150.,
+        light,
+    )));
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(0., -1000., 0.),
+        1000.,
+        Material::lambertian(Texture::noise(4.)),
+    )));
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(0., 2., 0.),
+        2.,
+        Material::lambertian(Texture::noise(4.)),
+    )));
     vec
 }

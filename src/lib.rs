@@ -6,6 +6,7 @@ pub mod hit;
 pub mod image;
 pub mod material;
 pub mod math;
+pub mod perlin;
 pub mod ray;
 pub mod shape;
 pub mod texture;

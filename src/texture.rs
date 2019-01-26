@@ -1,4 +1,5 @@
 use crate::math::float::Float;
+use crate::perlin::Perlin;
 use crate::vec3::Vec3;
 
 pub trait Sample {
@@ -9,6 +10,7 @@ pub trait Sample {
 pub enum Texture {
     Constant(Constant),
     CheckerBoard(CheckerBoard),
+    Noise(Perlin),
 }
 
 impl Texture {
@@ -23,6 +25,10 @@ impl Texture {
             multiplier: 1. / square_size,
         })
     }
+
+    pub fn noise(scale: Float) -> Texture {
+        Texture::Noise(Perlin::new(scale))
+    }
 }
 
 impl Sample for Texture {
@@ -30,6 +36,7 @@ impl Sample for Texture {
         match self {
             Texture::Constant(t) => t.sample(u, v, p),
             Texture::CheckerBoard(t) => t.sample(u, v, p),
+            Texture::Noise(t) => t.sample(u, v, p),
         }
     }
 }
