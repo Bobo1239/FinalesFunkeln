@@ -102,7 +102,11 @@ impl MaterialTrait for Lambertian {
     ) -> Option<(Ray, Vec3)> {
         let target: Vec3 = hit_record.p + hit_record.normal + random_in_unit_sphere(rng);
         let scattered: Ray = Ray::new(hit_record.p, target - hit_record.p, ray.time());
-        Some((scattered, self.texture.sample(0., 0., &hit_record.p)))
+        Some((
+            scattered,
+            self.texture
+                .sample(hit_record.u, hit_record.v, &hit_record.p),
+        ))
     }
 }
 

@@ -25,3 +25,7 @@ pub fn partial_max<T: PartialOrd>(a: T, b: T) -> T {
         b
     }
 }
+
+pub fn clamp<T: PartialOrd>(value: T, low: T, high: T) -> T {
+    partial_min(partial_max(value, low), high)
+}

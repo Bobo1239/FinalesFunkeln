@@ -1,3 +1,4 @@
+use crate::image::Image;
 use crate::math::float::Float;
 use crate::perlin::Perlin;
 use crate::vec3::Vec3;
@@ -11,6 +12,7 @@ pub enum Texture {
     Constant(Constant),
     CheckerBoard(CheckerBoard),
     Noise(Perlin),
+    Image(Image),
 }
 
 impl Texture {
@@ -29,6 +31,10 @@ impl Texture {
     pub fn noise(scale: Float) -> Texture {
         Texture::Noise(Perlin::new(scale))
     }
+
+    pub fn image(image: Image) -> Texture {
+        Texture::Image(image)
+    }
 }
 
 impl Sample for Texture {
@@ -37,6 +43,7 @@ impl Sample for Texture {
             Texture::Constant(t) => t.sample(u, v, p),
             Texture::CheckerBoard(t) => t.sample(u, v, p),
             Texture::Noise(t) => t.sample(u, v, p),
+            Texture::Image(t) => t.sample(u, v, p),
         }
     }
 }

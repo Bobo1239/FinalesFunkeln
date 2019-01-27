@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let hit_list = if true {
             vec![Box::new(random_scene(0.0, 1.0, &mut rng)?) as Box<dyn Hit<Prng>>]
         } else {
-            two_perlin_spheres()
+            two_spheres()
         };
         let camera = {
             let origin = Vec3::new(13., 2., 3.);
@@ -337,9 +337,12 @@ fn cornell_box_smoke<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
     vec
 }
 
-fn two_perlin_spheres<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
+fn two_spheres<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
     let mut vec: Vec<Box<dyn Hit<R>>> = Vec::new();
+
+    let image = Image::load_from_file("world.topo.200405.3x5400x2700.jpg").unwrap();
     let light = Material::diffuse_light(Texture::constant(Vec3::new(1., 1., 1.)));
+
     vec.push(Box::new(XZRect::new(
         (-100., 100.),
         (-100., 100.),
@@ -354,7 +357,8 @@ fn two_perlin_spheres<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
     vec.push(Box::new(Sphere::new(
         Vec3::new(0., 2., 0.),
         2.,
-        Material::lambertian(Texture::noise(4.)),
+        Material::lambertian(Texture::image(image)),
     )));
+
     vec
 }

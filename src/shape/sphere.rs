@@ -62,7 +62,7 @@ impl<R: Rng> Hit<R> for Sphere {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float, _: &mut R) -> Option<HitRecord<'_>> {
         fn calculate_hit_record<'a>(ray: &Ray, t: Float, sphere: &'a Sphere) -> HitRecord<'a> {
             let p = ray.point_at_parameter(t);
-            let (u, v) = sphere_uv(&p);
+            let (u, v) = sphere_uv((p - sphere.center) / sphere.radius);
             HitRecord {
                 t,
                 u,
@@ -105,7 +105,7 @@ impl<R: Rng> Hit<R> for Sphere {
     }
 }
 
-fn sphere_uv(p: &Vec3) -> (Float, Float) {
+fn sphere_uv(p: Vec3) -> (Float, Float) {
     let phi = p.z().atan2(p.x());
     let theta = p.y().asin();
     (1. - (phi + PI) / (2. * PI), (theta + FRAC_PI_2) / PI)

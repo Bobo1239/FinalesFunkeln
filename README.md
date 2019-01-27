@@ -21,3 +21,11 @@ additional features added after the event.
 [3]: https://github.com/petershirley/raytracingthenextweek
 [4]: https://seblagarde.wordpress.com/2014/11/05/ies-light-format-specification-and-reader
 [5]: https://computergraphics.stackexchange.com/questions/3995/solid-angle-and-surface-area-values-in-photometric-raytracing
+
+## Credits
+The earth imagery is from:
+
+R. Stöckli, E. Vermote, N. Saleous, R. Simmon and D. Herring (2005).
+The BlueMarble Next Generation - A true color earth dataset including seasonal dynamics
+from MODIS. Published by the NASA Earth Observatory.
+Corresponding author: rstockli@climate.gsfc.nasa.gov
