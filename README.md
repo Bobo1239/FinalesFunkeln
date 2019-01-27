@@ -25,7 +25,7 @@ additional features added after the event.
 ## Credits
 The earth imagery is from:
 
-R. Stöckli, E. Vermote, N. Saleous, R. Simmon and D. Herring (2005).
+[R. Stöckli, E. Vermote, N. Saleous, R. Simmon and D. Herring (2005).
 The BlueMarble Next Generation - A true color earth dataset including seasonal dynamics
 from MODIS. Published by the NASA Earth Observatory.
-Corresponding author: rstockli@climate.gsfc.nasa.gov
+Corresponding author: rstockli@climate.gsfc.nasa.gov](https://visibleearth.nasa.gov/view.php?id=74343)
