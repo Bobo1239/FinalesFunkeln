@@ -56,13 +56,19 @@ fn main() -> Result<(), Box<dyn Error>> {
         };
         (hit_list, camera)
     } else {
-        let hit_list = if false {
-            cornell_box()
+        let (hit_list, origin) = if true {
+            (final_scene(0., 1., &mut rng), Vec3::new(478., 278., -600.))
         } else {
-            cornell_box_smoke()
+            (
+                if true {
+                    cornell_box()
+                } else {
+                    cornell_box_smoke()
+                },
+                Vec3::new(278., 278., -800.),
+            )
         };
         let camera = {
-            let origin = Vec3::new(278., 278., -800.);
             let look_at = Vec3::new(278., 278., 0.);
             let up = Vec3::new(0., 1., 0.);
             let time = 0.0;
@@ -359,6 +365,114 @@ fn two_spheres<R: Rng>() -> Vec<Box<dyn Hit<R>>> {
         2.,
         Material::lambertian(Texture::image(image)),
     )));
+
+    vec
+}
+
+fn final_scene<R: Rng>(time_start: Float, time_end: Float, rng: &mut R) -> Vec<Box<dyn Hit<R>>> {
+    let mut vec: Vec<Box<dyn Hit<R>>> = Vec::new();
+
+    let white = Material::lambertian(Texture::constant(Vec3::new(0.73, 0.73, 0.73)));
+    let ground_material = Material::lambertian(Texture::constant(Vec3::new(0.48, 0.83, 0.53)));
+    let light = Material::diffuse_light(Texture::constant(Vec3::new(7., 7., 7.)));
+
+    let mut ground: Vec<Box<dyn Hit<R>>> = Vec::new();
+    let n = 20;
+    for i in 0..n {
+        for j in 0..n {
+            let w = 100.;
+            let x0 = -1000. + i as Float * w;
+            let z0 = -1000. + j as Float * w;
+            let y0 = 0.;
+            let x1 = x0 + w;
+            let y1 = 100. * (rng.gen::<Float>() + 0.01);
+            let z1 = z0 + w;
+            ground.push(Box::new(RectBox::new(
+                Vec3::new(x0, y0, z0),
+                Vec3::new(x1, y1, z1),
+                ground_material.clone(),
+            )));
+        }
+    }
+    vec.push(Box::new(
+        Bvh::new(ground, time_start, time_end, rng).unwrap(),
+    ));
+
+    vec.push(Box::new(XZRect::new(
+        (123., 423.),
+        (147., 412.),
+        553.,
+        light,
+    )));
+
+    vec.push(Box::new(Sphere::new_moving(
+        Vec3::new(400., 400., 200.),
+        50.,
+        Material::lambertian(Texture::constant(Vec3::new(0.7, 0.3, 0.1))),
+        Vec3::new(30., 0., 0.),
+    )));
+
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(260., 150., 45.),
+        50.,
+        Material::dielectric(1.5),
+    )));
+
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(0., 150., 145.),
+        50.,
+        Material::metal(Vec3::new(0.8, 0.8, 0.9), 1.),
+    )));
+
+    // TODO: Our Rust version currently needs to clone the inner hit object of a ConstantMedium
+    //       while the C version just stores a pointer to it. Probably related to the resource
+    //       managment TODO.
+    let subsurface = Sphere::new(Vec3::new(360., 150., 145.), 70., Material::dielectric(1.5));
+    vec.push(Box::new(subsurface.clone()));
+    vec.push(Box::new(ConstantMedium::new(
+        subsurface,
+        0.2,
+        Texture::constant(Vec3::new(0.2, 0.4, 0.9)),
+    )));
+
+    vec.push(Box::new(ConstantMedium::new(
+        Sphere::new(Vec3::zero(), 5000., Material::dielectric(1.5)),
+        0.0001,
+        Texture::constant(Vec3::new(1., 1., 1.)),
+    )));
+
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(400., 200., 400.),
+        100.,
+        Material::lambertian(Texture::image(
+            Image::load_from_file("world.topo.200405.3x5400x2700.jpg").unwrap(),
+        )),
+    )));
+
+    vec.push(Box::new(Sphere::new(
+        Vec3::new(220., 280., 300.),
+        80.,
+        Material::lambertian(Texture::noise(0.1)),
+    )));
+
+    let mut box_list: Vec<Box<dyn Hit<R>>> = Vec::new();
+    for _ in 0..1000 {
+        box_list.push(Box::new(Sphere::new(
+            Vec3::new(
+                165. * rng.gen::<Float>(),
+                165. * rng.gen::<Float>(),
+                165. * rng.gen::<Float>(),
+            ),
+            10.,
+            white.clone(),
+        )));
+    }
+    vec.push(Box::new(
+        Bvh::new(box_list, time_start, time_end, rng)
+            .unwrap()
+            .rotate_y(15.)
+            .translate(Vec3::new(-100., 270., 395.)),
+    ));
 
     vec
 }
