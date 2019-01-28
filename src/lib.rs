@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "f64", allow(clippy::cast_lossless))]
+
 use std::fmt::Debug;
 
 pub mod bvh;

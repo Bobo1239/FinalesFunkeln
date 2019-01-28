@@ -103,9 +103,9 @@ impl<R: Rng, T: Hit<R>> RotateY<R, T> {
                 for i in 0..2 {
                     for j in 0..2 {
                         for k in 0..2 {
-                            let x = i as f32 * bb.max.x() + (1 - i) as f32 * bb.min.x();
-                            let y = j as f32 * bb.max.y() + (1 - j) as f32 * bb.min.y();
-                            let z = k as f32 * bb.max.z() + (1 - k) as f32 * bb.min.z();
+                            let x = i as Float * bb.max.x() + (1 - i) as Float * bb.min.x();
+                            let y = j as Float * bb.max.y() + (1 - j) as Float * bb.min.y();
+                            let z = k as Float * bb.max.z() + (1 - k) as Float * bb.min.z();
                             let new_x = cos_theta * x + sin_theta * z;
                             let new_z = -sin_theta * x + cos_theta * z;
                             let tester = Vec3::new(new_x, y, new_z);

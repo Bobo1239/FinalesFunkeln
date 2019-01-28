@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "f64", allow(clippy::cast_lossless))]
+
 use std::error::Error;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
