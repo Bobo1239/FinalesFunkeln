@@ -5,7 +5,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex};
 
 use indicatif::{ProgressBar, ProgressStyle};
-use rand::FromEntropy;
+use rand::SeedableRng;
 use rand::Rng as RandRng;
 use rand_xoshiro::Xoshiro256StarStar;
 use rayon::prelude::*;
